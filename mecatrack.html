@@ -244,6 +244,16 @@ td { padding: 12px 14px; vertical-align: middle; }
 .chauffeur-form { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
 .chauffeur-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 2px; color: var(--blue); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
 
+/* STOCK */
+.stock-card { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--green); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.stock-card.alerte { border-left-color: var(--red); }
+.stock-name { font-weight: 600; font-size: 15px; }
+.stock-ref { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.stock-machine-tag { font-size: 12px; color: var(--blue); margin-top: 2px; }
+.stock-qty { font-family: 'Bebas Neue', sans-serif; font-size: 32px; line-height: 1; text-align: right; color: var(--green); }
+.stock-qty.danger { color: var(--red); }
+.stock-qty span { display: block; font-family: 'DM Sans', sans-serif; font-size: 11px; color: var(--muted); font-weight: 400; }
+
 @media (max-width: 600px) {
   .form-row { grid-template-columns: 1fr; }
   .stats-bar { grid-template-columns: 1fr 1fr; }
@@ -318,6 +328,8 @@ td { padding: 12px 14px; vertical-align: middle; }
   <div class="tab" id="tab-btn-historique" onclick="showTab('historique')">📋 Historique</div>
   <div class="tab hidden" id="tab-btn-reparations" onclick="showTab('reparations')">🔧 Réparations</div>
   <div class="tab hidden" id="tab-btn-chauffeur" onclick="showTab('chauffeur')">🚛 Ma saisie</div>
+  <div class="tab hidden" id="tab-btn-stock" onclick="showTab('stock')">📦 Stock</div>
+  <div class="tab hidden" id="tab-btn-stock-chauffeur" onclick="showTab('stock-chauffeur')">🪣 Consommables</div>
   <div class="tab hidden" id="tab-btn-users" onclick="showTab('users')">👥 Employés</div>
   <div class="tab hidden" id="tab-btn-journal" onclick="showTab('journal')">📊 Connexions</div>
 </div>
@@ -368,17 +380,19 @@ td { padding: 12px 14px; vertical-align: middle; }
         <option value="Vidange">Vidange</option>
         <option value="Filtre">Filtre</option>
         <option value="Graissage">Graissage</option>
-        <option value="Courroie">Courroie</option>
-        <option value="Hydraulique">Hydraulique</option>
-        <option value="Pneu">Pneu</option>
         <option value="Réparation">Réparation</option>
+        <option value="Panne signalée">🚨 Pannes signalées</option>
         <option value="Saisie chauffeur">Saisie chauffeur</option>
         <option value="Autre">Autre</option>
       </select>
     </div>
+
+    <!-- PANNES EN COURS -->
+    <div id="hist-pannes-encours"></div>
+
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Date</th><th>Machine</th><th>Chantier</th><th>Type</th><th>Heures</th><th>Par</th><th>Notes</th><th></th></tr></thead>
+        <thead><tr><th>Date</th><th>Machine</th><th>Chantier</th><th>Type</th><th>Heures</th><th>Par</th><th>Détails</th><th></th></tr></thead>
         <tbody id="hist-tbody"></tbody>
       </table>
       <div id="hist-empty" class="empty" style="display:none"><div class="empty-icon">📋</div><div>Aucune opération</div></div>
@@ -479,6 +493,31 @@ td { padding: 12px 14px; vertical-align: middle; }
 
   <!-- DETAIL -->
   <div class="page" id="tab-detail"><div id="detail-content"></div></div>
+
+  <!-- STOCK MÉCANICIEN/ADMIN -->
+  <div class="page" id="tab-stock">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+      <div class="section-title" style="margin:0"><div class="dot" style="background:var(--accent)"></div> Stock atelier</div>
+      <div style="display:flex;gap:8px">
+        <select class="filter-select" id="stock-filter-cat" onchange="renderStock()">
+          <option value="all">Toutes catégories</option>
+          <option value="Filtre">Filtres</option>
+          <option value="Huile">Huiles</option>
+          <option value="Pièce mécanique">Pièces mécaniques</option>
+          <option value="Consommable">Consommables</option>
+          <option value="Autre">Autre</option>
+        </select>
+        <button class="btn" onclick="openModal('new-article')">+ Article</button>
+      </div>
+    </div>
+    <div id="stock-list"></div>
+  </div>
+
+  <!-- STOCK CHAUFFEUR (consommables uniquement) -->
+  <div class="page" id="tab-stock-chauffeur">
+    <div class="section-title" style="margin-bottom:16px"><div class="dot" style="background:var(--blue)"></div> Consommables disponibles</div>
+    <div id="stock-chauffeur-list"></div>
+  </div>
 
   <!-- EMPLOYÉS -->
   <div class="page" id="tab-users">
@@ -704,6 +743,93 @@ td { padding: 12px 14px; vertical-align: middle; }
   </div>
 </div>
 
+<!-- MODAL: Nouvel article stock -->
+<div class="modal-overlay" id="modal-new-article">
+  <div class="modal">
+    <div class="modal-title" id="article-modal-title">Ajouter un article</div>
+    <div class="form-group">
+      <label class="form-label">Désignation *</label>
+      <input class="form-input" type="text" id="art-name" placeholder="ex: Filtre à huile CAT 320D">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Catégorie *</label>
+        <select class="form-select" id="art-cat">
+          <option value="Filtre">🔵 Filtre</option>
+          <option value="Huile">🟡 Huile</option>
+          <option value="Pièce mécanique">🔴 Pièce mécanique</option>
+          <option value="Consommable">🟢 Consommable</option>
+          <option value="Autre">⚪ Autre</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Référence</label>
+        <input class="form-input" type="text" id="art-ref" placeholder="ex: REF-001">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Quantité actuelle *</label>
+        <input class="form-input" type="number" id="art-qty" placeholder="ex: 10">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Unité</label>
+        <select class="form-select" id="art-unit">
+          <option value="pcs">Pièces</option>
+          <option value="L">Litres</option>
+          <option value="kg">Kg</option>
+          <option value="boîte">Boîtes</option>
+          <option value="rouleau">Rouleaux</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">🔴 Seuil d'alerte minimum *</label>
+      <input class="form-input" type="number" id="art-min" placeholder="ex: 2">
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">Alerte quand le stock passe sous ce seuil</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Machine(s) associée(s)</label>
+      <input class="form-input" type="text" id="art-machine" placeholder="ex: CAT 320D, Mecalac...">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('new-article')">Annuler</button>
+      <button class="btn" id="art-save-btn" onclick="saveArticle()">✓ Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Mouvement stock -->
+<div class="modal-overlay" id="modal-mouvement">
+  <div class="modal">
+    <div class="modal-title" id="mouvement-title">Mouvement de stock</div>
+    <div class="modal-sub" id="mouvement-sub"></div>
+    <div class="form-group">
+      <label class="form-label">Type de mouvement *</label>
+      <select class="form-select" id="mv-type">
+        <option value="sortie">➖ Sortie (utilisation)</option>
+        <option value="entree">➕ Entrée (réception)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Quantité *</label>
+      <input class="form-input" type="number" id="mv-qty" placeholder="ex: 2" min="1">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Par *</label>
+      <input class="form-input" type="text" id="mv-operator" placeholder="Prénom Nom">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <input class="form-input" type="text" id="mv-notes" placeholder="ex: Vidange Mecalac, livraison fournisseur...">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('mouvement')">Annuler</button>
+      <button class="btn" onclick="saveMouvement()">✓ Valider</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: Config vidange machine existante -->
 <div class="modal-overlay" id="modal-config-vidange">
   <div class="modal">
@@ -822,6 +948,8 @@ window.renderAll = function() {
     renderMachines && renderMachines();
     renderHistorique && renderHistorique();
     renderRepairs && renderRepairs();
+    renderStock && renderStock();
+    renderStockChauffeur && renderStockChauffeur();
     renderUsers && renderUsers();
     renderJournal && renderJournal();
     updateMachineSelects && updateMachineSelects();
@@ -835,9 +963,24 @@ onSnapshot(collection(db, 'machines'), snap => {
   window.renderAll();
 });
 
-let users = [], connexions = [];
+let users = [], connexions = [], stockArticles = [], stockMouvements = [];
 window._users = users;
 window._connexions = connexions;
+window._stockArticles = stockArticles;
+window._stockMouvements = stockMouvements;
+
+onSnapshot(collection(db, 'stock_articles'), snap => {
+  stockArticles.length = 0;
+  snap.forEach(d => stockArticles.push({ id: d.id, ...d.data() }));
+  window._stockArticles = stockArticles;
+  if (window._appReady) { renderStock(); renderStockChauffeur(); renderDashboard(); }
+});
+
+onSnapshot(query(collection(db, 'stock_mouvements'), orderBy('date', 'desc')), snap => {
+  stockMouvements.length = 0;
+  snap.forEach(d => stockMouvements.push({ id: d.id, ...d.data() }));
+  window._stockMouvements = stockMouvements;
+});
 
 onSnapshot(collection(db, 'users'), snap => {
   users.length = 0;
@@ -1249,6 +1392,88 @@ window.checkAndNotify = function() {
   renderDashboard();
 }
 
+// ---- STOCK ----
+window.saveArticle = async function() {
+  const name = document.getElementById('art-name').value.trim();
+  const cat = document.getElementById('art-cat').value;
+  const ref = document.getElementById('art-ref').value.trim();
+  const qty = parseInt(document.getElementById('art-qty').value);
+  const unit = document.getElementById('art-unit').value;
+  const min = parseInt(document.getElementById('art-min').value);
+  const machine = document.getElementById('art-machine').value.trim();
+  if (!name || isNaN(qty) || isNaN(min)) { alert('Veuillez remplir les champs obligatoires'); return; }
+  try {
+    const editId = window._editArticleId;
+    if (editId) {
+      await updateDoc(doc(db, 'stock_articles', editId), { name, cat, ref, qty, unit, min, machine, updatedAt: new Date().toISOString() });
+      showToast('✓ Article modifié !');
+      window._editArticleId = null;
+    } else {
+      await addDoc(collection(db, 'stock_articles'), { name, cat, ref, qty, unit, min, machine, createdAt: new Date().toISOString() });
+      showToast('✓ Article ajouté !');
+    }
+    closeModal('new-article');
+    ['art-name','art-ref','art-qty','art-min','art-machine'].forEach(id => document.getElementById(id).value = '');
+  } catch(e) { alert('Erreur: ' + e.message); }
+};
+
+window.openMouvement = function(articleId) {
+  const a = window._stockArticles.find(x => x.id === articleId);
+  if (!a) return;
+  window._currentArticleId = articleId;
+  document.getElementById('mouvement-title').textContent = a.name;
+  document.getElementById('mouvement-sub').textContent = `Stock actuel : ${a.qty} ${a.unit}`;
+  const user = window._currentUser;
+  if (user) document.getElementById('mv-operator').value = user.name || '';
+  document.getElementById('mv-qty').value = '';
+  document.getElementById('mv-notes').value = '';
+  openModal('mouvement');
+};
+
+window.saveMouvement = async function() {
+  const articleId = window._currentArticleId;
+  const a = window._stockArticles.find(x => x.id === articleId);
+  if (!a) return;
+  const type = document.getElementById('mv-type').value;
+  const qty = parseInt(document.getElementById('mv-qty').value);
+  const operator = document.getElementById('mv-operator').value.trim();
+  const notes = document.getElementById('mv-notes').value.trim();
+  if (!qty || qty <= 0 || !operator) { alert('Veuillez remplir tous les champs'); return; }
+  const newQty = type === 'entree' ? a.qty + qty : a.qty - qty;
+  if (newQty < 0) { alert(`Stock insuffisant ! Stock actuel : ${a.qty} ${a.unit}`); return; }
+  try {
+    await updateDoc(doc(db, 'stock_articles', articleId), { qty: newQty, updatedAt: new Date().toISOString() });
+    await addDoc(collection(db, 'stock_mouvements'), {
+      articleId, articleName: a.name, type, qty, newQty,
+      operator, notes, unit: a.unit,
+      date: new Date().toISOString(),
+    });
+    closeModal('mouvement');
+    showToast(type === 'entree' ? `✓ +${qty} ${a.unit} ajoutés !` : `✓ -${qty} ${a.unit} sortis !`);
+  } catch(e) { alert('Erreur: ' + e.message); }
+};
+
+window.editArticle = function(id) {
+  const a = window._stockArticles.find(x => x.id === id);
+  if (!a) return;
+  window._editArticleId = id;
+  document.getElementById('article-modal-title').textContent = 'Modifier l\'article';
+  document.getElementById('art-name').value = a.name;
+  document.getElementById('art-cat').value = a.cat;
+  document.getElementById('art-ref').value = a.ref || '';
+  document.getElementById('art-qty').value = a.qty;
+  document.getElementById('art-unit').value = a.unit || 'pcs';
+  document.getElementById('art-min').value = a.min;
+  document.getElementById('art-machine').value = a.machine || '';
+  document.getElementById('art-save-btn').textContent = '✓ Enregistrer';
+  openModal('new-article');
+};
+
+window.deleteArticle = async function(id) {
+  if (!confirm('Supprimer cet article ?')) return;
+  try { await deleteDoc(doc(db, 'stock_articles', id)); showToast('Article supprimé'); } catch(e) { alert('Erreur: ' + e.message); }
+};
+
 // ---- CONFIG VIDANGE MACHINE EXISTANTE ----
 window.openConfigVidange = function(machineId) {
   const m = window._machines.find(x => x.id === machineId);
@@ -1490,6 +1715,8 @@ function applyRole(role, user) {
   // Tabs visibilité
   document.getElementById('tab-btn-reparations').classList.toggle('hidden', role === 'chauffeur');
   document.getElementById('tab-btn-chauffeur').classList.toggle('hidden', role !== 'chauffeur');
+  document.getElementById('tab-btn-stock').classList.toggle('hidden', role === 'chauffeur');
+  document.getElementById('tab-btn-stock-chauffeur').classList.toggle('hidden', role !== 'chauffeur');
   document.getElementById('tab-btn-users').classList.toggle('hidden', role !== 'admin');
   document.getElementById('tab-btn-journal').classList.toggle('hidden', role !== 'admin');
   document.getElementById('add-machine-btn').style.display = (role === 'admin') ? '' : 'none';
@@ -1609,6 +1836,89 @@ function renderJournal() {
 function getMachines() { return window._machines || []; }
 function getOperations() { return window._operations || []; }
 function getRepairs() { return window._repairs || []; }
+function getStock() { return window._stockArticles || []; }
+
+// ---- RENDER STOCK ----
+function renderStock() {
+  const articles = getStock();
+  const filter = document.getElementById('stock-filter-cat')?.value || 'all';
+  let list = articles;
+  if (filter !== 'all') list = articles.filter(a => a.cat === filter);
+  list = list.sort((a,b) => {
+    // Alertes en premier
+    const aAlert = a.qty <= a.min ? 0 : 1;
+    const bAlert = b.qty <= b.min ? 0 : 1;
+    return aAlert - bAlert || a.name.localeCompare(b.name);
+  });
+
+  const div = document.getElementById('stock-list');
+  if (!div) return;
+  const isAdmin = window._currentRole === 'admin';
+  const alertCount = articles.filter(a => a.qty <= a.min).length;
+
+  if (alertCount > 0) {
+    div.innerHTML = `<div style="background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.3);border-radius:8px;padding:12px;margin-bottom:14px;color:var(--red);font-size:14px;font-weight:600">
+      🔴 ${alertCount} article(s) en rupture ou stock bas !
+    </div>`;
+  } else {
+    div.innerHTML = '';
+  }
+
+  if (list.length === 0) {
+    div.innerHTML += '<div class="empty"><div class="empty-icon">📦</div><div>Aucun article — ajoutez le premier !</div></div>';
+    return;
+  }
+
+  const catColors = { 'Filtre': 'var(--blue)', 'Huile': 'var(--orange)', 'Pièce mécanique': 'var(--red)', 'Consommable': 'var(--green)', 'Autre': 'var(--muted)' };
+
+  div.innerHTML += list.map(a => {
+    const isAlerte = a.qty <= a.min;
+    return `<div class="stock-card ${isAlerte?'alerte':''}">
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <div class="stock-name">${a.name}</div>
+          <span style="padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;background:rgba(128,128,128,0.1);color:${catColors[a.cat]||'var(--muted)'}">${a.cat}</span>
+          ${isAlerte?'<span style="padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;background:rgba(231,76,60,0.15);color:var(--red)">🔴 STOCK BAS</span>':''}
+        </div>
+        ${a.ref?`<div class="stock-ref">Réf : ${a.ref}</div>`:''}
+        ${a.machine?`<div class="stock-machine-tag">🚧 ${a.machine}</div>`:''}
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Seuil min : ${a.min} ${a.unit}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="stock-qty ${isAlerte?'danger':''}">${a.qty}<span>${a.unit}</span></div>
+        <div style="display:flex;gap:6px;margin-top:6px;justify-content:flex-end">
+          <button class="btn-sm btn-primary" onclick="openMouvement('${a.id}')">±</button>
+          ${isAdmin?`<button class="btn-sm btn-outline" onclick="editArticle('${a.id}')">✏️</button>`:''}
+          ${isAdmin?`<button class="btn-sm btn-danger" onclick="deleteArticle('${a.id}')">🗑</button>`:''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ---- RENDER STOCK CHAUFFEUR (consommables uniquement) ----
+function renderStockChauffeur() {
+  const articles = getStock().filter(a => a.cat === 'Consommable');
+  const div = document.getElementById('stock-chauffeur-list');
+  if (!div) return;
+  if (articles.length === 0) {
+    div.innerHTML = '<div class="empty"><div class="empty-icon">🪣</div><div>Aucun consommable enregistré</div></div>';
+    return;
+  }
+  div.innerHTML = articles.map(a => {
+    const isAlerte = a.qty <= a.min;
+    return `<div class="stock-card ${isAlerte?'alerte':''}">
+      <div style="flex:1">
+        <div class="stock-name">${a.name}</div>
+        ${isAlerte?'<div style="font-size:12px;color:var(--red);font-weight:600;margin-top:3px">⚠ Stock bas — prévenez le mécanicien</div>':'<div style="font-size:12px;color:var(--green);margin-top:3px">✓ Disponible</div>'}
+      </div>
+      <div style="text-align:right">
+        <div class="stock-qty ${isAlerte?'danger':''}">${a.qty}<span>${a.unit}</span></div>
+        <button class="btn-sm btn-primary" style="margin-top:6px" onclick="openMouvement('${a.id}')">Prendre</button>
+      </div>
+    </div>`;
+  }).join('');
+}
 
 function getStatus(m) {
   // Statut entretien général
@@ -1638,6 +1948,8 @@ function showTab(name) {
   if (name === 'machines') renderMachines();
   if (name === 'historique') renderHistorique();
   if (name === 'reparations') renderRepairs();
+  if (name === 'stock') renderStock();
+  if (name === 'stock-chauffeur') renderStockChauffeur();
   if (name === 'users') renderUsers();
   if (name === 'journal') { updateJournalFilter(); renderJournal(); }
 }
@@ -1907,19 +2219,110 @@ window.showDetail = function(machineId) {
 function renderHistorique(search) {
   const machines = getMachines();
   const operations = getOperations();
+  const repairs = getRepairs();
   const hm = document.getElementById('hist-filter-machine').value;
   const s = (search || '').toLowerCase();
+  const isAdmin = window._currentRole === 'admin';
+
+  // ---- PANNES EN COURS (non clôturées) ----
+  const pannesDiv = document.getElementById('hist-pannes-encours');
+  if (pannesDiv) {
+    const pannesEnCours = repairs.filter(r => r.status === 'pending');
+    if (pannesEnCours.length > 0) {
+      pannesDiv.innerHTML = `
+        <div style="margin-bottom:16px">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;color:var(--red);margin-bottom:8px">
+            🚨 PANNES EN ATTENTE DE RÉPARATION (${pannesEnCours.length})
+          </div>
+          ${pannesEnCours.map(r => {
+            const m = machines.find(x => x.id === r.machineId);
+            return `<div style="background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.3);border-left:4px solid var(--red);border-radius:8px;padding:12px;margin-bottom:8px">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
+                <div>
+                  <div style="font-weight:600;font-size:14px">🚛 ${r.reportedBy} — ${m?m.name:'Machine'}</div>
+                  <div style="font-size:12px;color:var(--muted);margin-top:2px">${formatDate(r.date)} · ${r.hours}h${r.location?' · 📍 '+r.location:''}</div>
+                  <div style="font-size:13px;color:var(--text);margin-top:6px;background:var(--surface2);padding:8px;border-radius:6px">${r.description}</div>
+                </div>
+                <span class="badge badge-red">En attente</span>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>`;
+    } else {
+      pannesDiv.innerHTML = '';
+    }
+  }
+
+  // ---- HISTORIQUE COMPLET ----
+  // Fusionner opérations + réparations clôturées dans un seul flux
   let list = [...operations];
+
+  // Ajouter les pannes signalées comme entrées d'historique
+  repairs.forEach(r => {
+    const m = machines.find(x => x.id === r.machineId);
+    // Entrée : panne signalée
+    list.push({
+      _isPanne: true,
+      id: 'panne_' + r.id,
+      machineId: r.machineId,
+      type: 'Panne signalée',
+      date: r.date,
+      operator: r.reportedBy,
+      hours: r.hours,
+      location: r.location || '',
+      notes: r.description,
+      status: r.status,
+      closedBy: r.closedBy,
+      closedAt: r.closedAt,
+      closedType: r.closedType,
+      repairId: r.id
+    });
+  });
+
+  // Trier par date décroissante
+  list.sort((a,b) => new Date(b.date||b.createdAt||0) - new Date(a.date||a.createdAt||0));
+
+  // Filtres
   if (hm !== 'all') list = list.filter(o => o.machineId === hm);
-  if (currentHistType !== 'all') list = list.filter(o => o.type === currentHistType);
+  if (currentHistType !== 'all') list = list.filter(o => o.type === currentHistType || (currentHistType === 'Panne signalée' && o._isPanne));
   if (s) list = list.filter(o => {
     const m = machines.find(x=>x.id===o.machineId);
-    return (m&&m.name.toLowerCase().includes(s))||(o.type||'').toLowerCase().includes(s)||(o.operator||'').toLowerCase().includes(s)||(o.location||'').toLowerCase().includes(s);
+    return (m&&m.name.toLowerCase().includes(s))||(o.type||'').toLowerCase().includes(s)||(o.operator||'').toLowerCase().includes(s)||(o.location||'').toLowerCase().includes(s)||(o.notes||'').toLowerCase().includes(s);
   });
+
   const tbody = document.getElementById('hist-tbody');
-  const isAdmin = window._currentRole === 'admin';
+
   tbody.innerHTML = list.map(o => {
     const m = machines.find(x=>x.id===o.machineId);
+
+    if (o._isPanne) {
+      // Ligne panne signalée
+      const isDone = o.status === 'done';
+      const rowColor = isDone ? 'rgba(46,204,113,0.05)' : 'rgba(231,76,60,0.05)';
+      return `<tr style="background:${rowColor}">
+        <td>${formatDate(o.date)}</td>
+        <td>${m?m.name:'—'}</td>
+        <td style="color:var(--blue);font-size:12px">${o.location||'—'}</td>
+        <td>
+          <span class="op-type">
+            <span class="op-dot" style="background:${isDone?'var(--green)':'var(--red)'}"></span>
+            ${isDone?'✅ Panne réparée':'🚨 Panne signalée'}
+          </span>
+        </td>
+        <td>${o.hours}h</td>
+        <td>
+          <div style="font-weight:600">🚛 ${o.operator}</div>
+          ${isDone?`<div style="font-size:11px;color:var(--green);margin-top:2px">✓ Réparé par ${o.closedBy} le ${formatDate(o.closedAt)}</div>`:'<div style="font-size:11px;color:var(--red)">⏳ En attente</div>'}
+        </td>
+        <td style="font-size:12px">
+          <div style="color:var(--red);font-weight:500">Panne : ${o.notes}</div>
+          ${isDone&&o.closedType?`<div style="color:var(--green);margin-top:4px">Intervention : ${o.closedType}</div>`:''}
+        </td>
+        <td></td>
+      </tr>`;
+    }
+
+    // Ligne opération normale
     return `<tr>
       <td>${formatDate(o.date)}</td>
       <td>${m?m.name:'—'}</td>
@@ -1931,9 +2334,10 @@ function renderHistorique(search) {
         ${o.fioulFait?'<span style="color:var(--green)">⛽'+(o.fioulLitres?' '+o.fioulLitres+'L':'')+'</span><br>':''}
         ${o.notes||''}
       </td>
-      ${isAdmin?`<td><button class="btn-sm btn-danger" onclick="deleteOperation('${o.id}')">🗑</button></td>`:''}
+      ${isAdmin?`<td><button class="btn-sm btn-danger" onclick="deleteOperation('${o.id}')">🗑</button></td>`:'<td></td>'}
     </tr>`;
   }).join('');
+
   document.getElementById('hist-empty').style.display = list.length===0?'block':'none';
 }
 
@@ -2153,6 +2557,8 @@ window.updateJournalFilter = updateJournalFilter;
 window.renderEmployeeGrid = renderEmployeeGrid;
 window.checkVidangeAlert = checkVidangeAlert;
 window.openConfigVidange = window.openConfigVidange;
+window.renderStock = renderStock;
+window.renderStockChauffeur = renderStockChauffeur;
 </script>
 </body>
 </html>

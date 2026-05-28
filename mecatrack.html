@@ -763,10 +763,24 @@ window._operations = operations;
 window._repairs = repairs;
 window._chauffeurEntries = chauffeurEntries;
 
+// renderAll défini tôt pour être disponible dans les listeners
+window.renderAll = function() {
+  if (window._appReady) {
+    renderDashboard && renderDashboard();
+    renderMachines && renderMachines();
+    renderHistorique && renderHistorique();
+    renderRepairs && renderRepairs();
+    renderUsers && renderUsers();
+    renderJournal && renderJournal();
+    updateMachineSelects && updateMachineSelects();
+    updateJournalFilter && updateJournalFilter();
+  }
+};
+
 onSnapshot(collection(db, 'machines'), snap => {
   machines.length = 0;
   snap.forEach(d => machines.push({ id: d.id, ...d.data() }));
-  if (window._appReady) { renderAll(); }
+  window.renderAll();
 });
 
 let users = [], connexions = [];
@@ -791,20 +805,20 @@ onSnapshot(query(collection(db, 'connexions'), orderBy('connectedAt', 'desc')), 
 onSnapshot(query(collection(db, 'operations'), orderBy('date', 'desc')), snap => {
   operations.length = 0;
   snap.forEach(d => operations.push({ id: d.id, ...d.data() }));
-  if (window._appReady) { renderAll(); }
+  window.renderAll();
   if (!window._appReady) { window._appReady = true; finishLoad(); }
 });
 
 onSnapshot(collection(db, 'repairs'), snap => {
   repairs.length = 0;
   snap.forEach(d => repairs.push({ id: d.id, ...d.data() }));
-  if (window._appReady) { renderAll(); }
+  window.renderAll();
 });
 
 onSnapshot(query(collection(db, 'chauffeur_entries'), orderBy('date', 'desc')), snap => {
   chauffeurEntries.length = 0;
   snap.forEach(d => chauffeurEntries.push({ id: d.id, ...d.data() }));
-  if (window._appReady) { renderAll(); }
+  window.renderAll();
 });
 
 setTimeout(() => {
@@ -812,9 +826,16 @@ setTimeout(() => {
 }, 4000);
 
 function finishLoad() {
+  window._appReady = true;
   document.getElementById('loading-screen').style.display = 'none';
-  renderAll();
+  renderDashboard();
+  renderMachines();
+  renderHistorique();
+  renderRepairs();
+  renderUsers();
+  renderJournal();
   updateMachineSelects();
+  updateJournalFilter();
   renderEmployeeGrid();
 }
 

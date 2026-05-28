@@ -193,6 +193,23 @@ td { padding: 12px 14px; vertical-align: middle; }
 .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--green); color: #000; padding: 12px 24px; border-radius: 30px; font-weight: 600; font-size: 14px; z-index: 999; opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap; }
 .toast.show { opacity: 1; }
 
+/* VIDANGE TYPES */
+.vidange-recap { border-radius: 10px; padding: 14px; margin-bottom: 14px; }
+.vidange-recap.type1 { background: rgba(46,204,113,0.08); border: 1px solid rgba(46,204,113,0.3); }
+.vidange-recap.type2 { background: rgba(243,156,18,0.08); border: 1px solid rgba(243,156,18,0.3); }
+.vidange-recap.type3 { background: rgba(231,76,60,0.08); border: 1px solid rgba(231,76,60,0.3); }
+.vidange-recap-title { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 2px; margin-bottom: 8px; }
+.vidange-recap.type1 .vidange-recap-title { color: var(--green); }
+.vidange-recap.type2 .vidange-recap-title { color: var(--orange); }
+.vidange-recap.type3 .vidange-recap-title { color: var(--red); }
+.vidange-checklist { list-style: none; padding: 0; }
+.vidange-checklist li { font-size: 13px; padding: 4px 0; display: flex; align-items: center; gap: 8px; }
+.vidange-checklist li::before { content: '✓'; font-weight: 700; }
+.vidange-recap.type1 .vidange-checklist li::before { color: var(--green); }
+.vidange-recap.type2 .vidange-checklist li::before { color: var(--orange); }
+.vidange-recap.type3 .vidange-checklist li::before { color: var(--red); }
+.vidange-next-badge { display: inline-block; margin-top: 8px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: var(--surface2); color: var(--muted); }
+
 /* NOTIF BANNER */
 .notif-banner { background: rgba(231,76,60,0.1); border: 1px solid rgba(231,76,60,0.3); border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; cursor: pointer; }
 .notif-banner:hover { background: rgba(231,76,60,0.15); }
@@ -233,28 +250,38 @@ td { padding: 12px 14px; vertical-align: middle; }
 <!-- PIN SCREEN -->
 <div id="pin-screen" class="open">
   <div class="pin-logo">MécaTrack</div>
-  <div class="pin-title">RABASSE TP -- Sélectionnez votre rôle</div>
-  <div class="pin-roles">
-    <button class="pin-role-btn active" onclick="selectRole('chauffeur')">🚛 Chauffeur</button>
-    <button class="pin-role-btn" onclick="selectRole('mecanicien')">🔧 Mécanicien</button>
-    <button class="pin-role-btn" onclick="selectRole('admin')">⚙️ Admin</button>
+  <div class="pin-title" id="pin-screen-title">RABASSE TP -- Qui êtes-vous ?</div>
+
+  <!-- ÉTAPE 1 : Choisir son nom -->
+  <div class="pin-step" id="pin-step-employee">
+    <div class="pin-step-title">Sélectionnez votre nom</div>
+    <div class="employee-grid" id="employee-grid"></div>
+    <div style="margin-top:12px;text-align:center">
+      <button class="pin-back-btn" onclick="showAdminLogin()">⚙️ Admin</button>
+    </div>
   </div>
-  <div class="pin-display" id="pin-display">····</div>
-  <div class="pin-pad">
-    <button class="pin-key" onclick="pinKey('1')">1</button>
-    <button class="pin-key" onclick="pinKey('2')">2</button>
-    <button class="pin-key" onclick="pinKey('3')">3</button>
-    <button class="pin-key" onclick="pinKey('4')">4</button>
-    <button class="pin-key" onclick="pinKey('5')">5</button>
-    <button class="pin-key" onclick="pinKey('6')">6</button>
-    <button class="pin-key" onclick="pinKey('7')">7</button>
-    <button class="pin-key" onclick="pinKey('8')">8</button>
-    <button class="pin-key" onclick="pinKey('9')">9</button>
-    <button class="pin-key clear" onclick="pinClear()">⌫</button>
-    <button class="pin-key" onclick="pinKey('0')">0</button>
-    <button class="pin-key enter" onclick="pinEnter()">✓</button>
+
+  <!-- ÉTAPE 2 : Saisir son PIN -->
+  <div class="pin-step" id="pin-step-pin" style="display:none;text-align:center">
+    <div class="pin-step-title" id="pin-step-who"></div>
+    <div class="pin-display" id="pin-display">····</div>
+    <div class="pin-pad" style="margin:0 auto">
+      <button class="pin-key" onclick="pinKey('1')">1</button>
+      <button class="pin-key" onclick="pinKey('2')">2</button>
+      <button class="pin-key" onclick="pinKey('3')">3</button>
+      <button class="pin-key" onclick="pinKey('4')">4</button>
+      <button class="pin-key" onclick="pinKey('5')">5</button>
+      <button class="pin-key" onclick="pinKey('6')">6</button>
+      <button class="pin-key" onclick="pinKey('7')">7</button>
+      <button class="pin-key" onclick="pinKey('8')">8</button>
+      <button class="pin-key" onclick="pinKey('9')">9</button>
+      <button class="pin-key clear" onclick="pinClear()">⌫</button>
+      <button class="pin-key" onclick="pinKey('0')">0</button>
+      <button class="pin-key enter" onclick="pinEnter()">✓</button>
+    </div>
+    <div class="pin-error" id="pin-error"></div>
+    <button class="pin-back-btn" onclick="backToEmployeeList()" style="margin-top:8px">← Retour</button>
   </div>
-  <div class="pin-error" id="pin-error"></div>
 </div>
 
 <!-- HEADER -->
@@ -274,6 +301,8 @@ td { padding: 12px 14px; vertical-align: middle; }
   <div class="tab" id="tab-btn-historique" onclick="showTab('historique')">📋 Historique</div>
   <div class="tab hidden" id="tab-btn-reparations" onclick="showTab('reparations')">🔧 Réparations</div>
   <div class="tab hidden" id="tab-btn-chauffeur" onclick="showTab('chauffeur')">🚛 Ma saisie</div>
+  <div class="tab hidden" id="tab-btn-users" onclick="showTab('users')">👥 Employés</div>
+  <div class="tab hidden" id="tab-btn-journal" onclick="showTab('journal')">📊 Connexions</div>
 </div>
 
 <main>
@@ -376,6 +405,41 @@ td { padding: 12px 14px; vertical-align: middle; }
           <input class="form-input" type="text" id="ch-operator" placeholder="Prénom Nom">
         </div>
       </div>
+
+      <div class="form-group">
+        <label class="form-label">Équipements sur la machine</label>
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer">
+            <input type="checkbox" id="eq-pince-tri" style="width:16px;height:16px;accent-color:var(--accent)"> Pince de tri
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer">
+            <input type="checkbox" id="eq-veine" style="width:16px;height:16px;accent-color:var(--accent)"> Veine preneuse
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer">
+            <input type="checkbox" id="eq-pince-rail" style="width:16px;height:16px;accent-color:var(--accent)"> Pince à rail
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer">
+            <input type="checkbox" id="eq-broyeur" style="width:16px;height:16px;accent-color:var(--accent)"> Broyeur
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer">
+            <input type="checkbox" id="eq-palonnier" style="width:16px;height:16px;accent-color:var(--accent)"> Palonnier
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">⛽ Plein de fioul effectué ?</label>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer">
+            <input type="radio" name="fioul" id="fioul-non" value="non" checked style="accent-color:var(--accent)"> Non
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer">
+            <input type="radio" name="fioul" id="fioul-oui" value="oui" style="accent-color:var(--accent)"> Oui
+          </label>
+          <input class="form-input" type="number" id="fioul-litres" placeholder="Quantité (litres)" style="flex:1;min-width:140px;display:none">
+        </div>
+      </div>
+
       <div class="form-group">
         <label class="form-label">Réparations à signaler</label>
         <textarea class="form-textarea" id="ch-repairs" placeholder="Ex: Fuite hydraulique côté droit, voyant moteur allumé..."></textarea>
@@ -390,7 +454,55 @@ td { padding: 12px 14px; vertical-align: middle; }
 
   <!-- DETAIL -->
   <div class="page" id="tab-detail"><div id="detail-content"></div></div>
+
+  <!-- EMPLOYÉS -->
+  <div class="page" id="tab-users">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+      <div class="section-title" style="margin:0"><div class="dot" style="background:var(--blue)"></div> Gestion des employés</div>
+      <button class="btn" onclick="openModal('new-user')">+ Ajouter un employé</button>
+    </div>
+    <div id="users-list"></div>
+  </div>
+
+  <!-- JOURNAL CONNEXIONS -->
+  <div class="page" id="tab-journal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+      <div class="section-title" style="margin:0"><div class="dot" style="background:var(--green)"></div> Journal des connexions</div>
+      <select class="filter-select" id="journal-filter" onchange="renderJournal()">
+        <option value="all">Tous les employés</option>
+      </select>
+    </div>
+    <div id="journal-list"></div>
+  </div>
 </main>
+
+<!-- MODAL: Nouvel employé -->
+<div class="modal-overlay" id="modal-new-user">
+  <div class="modal">
+    <div class="modal-title" id="user-modal-title">Ajouter un employé</div>
+    <div class="modal-sub">Créez un compte avec un code PIN personnel</div>
+    <div class="form-group">
+      <label class="form-label">Prénom et Nom *</label>
+      <input class="form-input" type="text" id="u-name" placeholder="ex: Jean Dupont">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Rôle *</label>
+      <select class="form-select" id="u-role">
+        <option value="chauffeur">🚛 Chauffeur</option>
+        <option value="mecanicien">🔧 Mécanicien</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Code PIN (4 chiffres) *</label>
+      <input class="form-input" type="number" id="u-pin" placeholder="ex: 1234" maxlength="4">
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">Donnez ce code à l'employé -- il sera son mot de passe</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('new-user')">Annuler</button>
+      <button class="btn" id="u-save-btn" onclick="saveUser()">✓ Créer le compte</button>
+    </div>
+  </div>
+</div>
 
 <!-- MODAL: Entretien mécanicien -->
 <div class="modal-overlay" id="modal-new-op">
@@ -465,7 +577,7 @@ td { padding: 12px 14px; vertical-align: middle; }
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">Heures actuelles</label>
+        <label class="form-label">Heures actuelles *</label>
         <input class="form-input" type="number" id="m-hours" placeholder="ex: 1000">
       </div>
       <div class="form-group">
@@ -478,9 +590,31 @@ td { padding: 12px 14px; vertical-align: middle; }
       <input class="form-input" type="text" id="m-location" placeholder="ex: Chantier A13">
     </div>
     <div class="form-group">
-      <label class="form-label">Prochain entretien (heures)</label>
+      <label class="form-label">Prochain entretien général (heures)</label>
       <input class="form-input" type="number" id="m-next" placeholder="ex: 1500">
     </div>
+
+    <div style="background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.2);border-radius:8px;padding:14px;margin-bottom:16px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;color:var(--red);margin-bottom:10px">🔴 Vidange -- Situation actuelle</div>
+      <div class="form-row">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Dernière vidange à (heures)</label>
+          <input class="form-input" type="number" id="m-last-vidange" placeholder="ex: 850">
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">Heures machine au moment de la dernière vidange</div>
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Type de vidange suivante</label>
+          <select class="form-select" id="m-vidange-type">
+            <option value="0">🟢 Type 1 (250h)</option>
+            <option value="1">🟠 Type 2 (500h)</option>
+            <option value="2">🟢 Type 1 (750h)</option>
+            <option value="3">🔴 Type 3 (1000h)</option>
+          </select>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">Quelle vidange est prévue prochainement</div>
+        </div>
+      </div>
+    </div>
+
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('new-machine')">Annuler</button>
       <button class="btn" onclick="saveMachine()">✓ Ajouter</button>
@@ -545,6 +679,42 @@ td { padding: 12px 14px; vertical-align: middle; }
   </div>
 </div>
 
+<!-- MODAL: Vidange -->
+<div class="modal-overlay" id="modal-vidange">
+  <div class="modal">
+    <div class="modal-title" id="vidange-modal-title">Vidange</div>
+    <div class="modal-sub" id="vidange-modal-sub"></div>
+    <div id="vidange-recap-display"></div>
+    <div class="form-group">
+      <label class="form-label">Mécanicien *</label>
+      <input class="form-input" type="text" id="vid-operator" placeholder="Prénom Nom">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Heures machine *</label>
+        <input class="form-input" type="number" id="vid-hours" placeholder="ex: 1250">
+        <div class="locked-info" id="vid-hours-msg"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Date *</label>
+        <input class="form-input" type="date" id="vid-date">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Chantier / Lieu</label>
+      <input class="form-input" type="text" id="vid-location" placeholder="ex: Chantier A13">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes / Références pièces</label>
+      <textarea class="form-textarea" id="vid-notes" placeholder="Huile 15W40 - 10L, Filtre ref. XX..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('vidange')">Annuler</button>
+      <button class="btn" onclick="saveVidange()">✓ Valider la vidange</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <!-- FIREBASE -->
@@ -579,6 +749,25 @@ onSnapshot(collection(db, 'machines'), snap => {
   if (window._appReady) { renderAll(); }
 });
 
+let users = [], connexions = [];
+window._users = users;
+window._connexions = connexions;
+
+onSnapshot(collection(db, 'users'), snap => {
+  users.length = 0;
+  snap.forEach(d => users.push({ id: d.id, ...d.data() }));
+  window._users = users;
+  renderEmployeeGrid();
+  if (window._appReady) { renderUsers(); updateJournalFilter(); }
+});
+
+onSnapshot(query(collection(db, 'connexions'), orderBy('connectedAt', 'desc')), snap => {
+  connexions.length = 0;
+  snap.forEach(d => connexions.push({ id: d.id, ...d.data() }));
+  window._connexions = connexions;
+  if (window._appReady) { renderJournal(); }
+});
+
 onSnapshot(query(collection(db, 'operations'), orderBy('date', 'desc')), snap => {
   operations.length = 0;
   snap.forEach(d => operations.push({ id: d.id, ...d.data() }));
@@ -606,6 +795,7 @@ function finishLoad() {
   document.getElementById('loading-screen').style.display = 'none';
   renderAll();
   updateMachineSelects();
+  renderEmployeeGrid();
 }
 
 window.renderAll = function() {
@@ -613,7 +803,10 @@ window.renderAll = function() {
   renderMachines();
   renderHistorique();
   renderRepairs();
+  renderUsers();
+  renderJournal();
   updateMachineSelects();
+  updateJournalFilter();
 }
 
 // ---- SAVE OPERATION (MÉCANICIEN) ----
@@ -674,20 +867,38 @@ window.saveMachine = async function() {
   const interval = parseInt(document.getElementById('m-interval').value) || 500;
   const next = parseInt(document.getElementById('m-next').value) || hours + interval;
   const location = document.getElementById('m-location').value.trim();
+  const lastVidangeHours = parseInt(document.getElementById('m-last-vidange').value) || hours;
+  const vidangeTypeIndex = parseInt(document.getElementById('m-vidange-type').value) || 0;
+
   if (!name) { alert('Veuillez entrer un nom de machine'); return; }
   try {
     await addDoc(collection(db, 'machines'), {
-      name, serial: serial || '--', hours, nextService: next, interval, location: location || '',
+      name,
+      serial: serial || '--',
+      hours,
+      nextService: next,
+      interval,
+      location: location || '',
+      lastVidangeHours,
+      vidangeTypeIndex,
       createdAt: new Date().toISOString()
     });
     closeModal('new-machine');
-    ['m-name','m-serial','m-hours','m-next','m-location'].forEach(id => document.getElementById(id).value = '');
+    ['m-name','m-serial','m-hours','m-next','m-location','m-last-vidange'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('m-interval').value = '500';
+    document.getElementById('m-vidange-type').value = '0';
     showToast('✓ Machine ajoutée !');
   } catch(e) { alert('Erreur: ' + e.message); }
 };
 
 // ---- SAVE SAISIE CHAUFFEUR ----
+// Afficher/masquer le champ litres fioul
+document.querySelectorAll('input[name="fioul"]').forEach(r => {
+  r.addEventListener('change', function() {
+    document.getElementById('fioul-litres').style.display = this.value === 'oui' ? 'block' : 'none';
+  });
+});
+
 window.saveChauffeurEntry = async function() {
   const machineId = document.getElementById('ch-machine').value;
   const location = document.getElementById('ch-location').value.trim();
@@ -695,6 +906,15 @@ window.saveChauffeurEntry = async function() {
   const operator = document.getElementById('ch-operator').value.trim();
   const repairsText = document.getElementById('ch-repairs').value.trim();
   const notes = document.getElementById('ch-notes').value.trim();
+
+  // Récupérer les équipements cochés
+  const equipIds = ['pince-tri','veine','pince-rail','broyeur','palonnier'];
+  const equipLabels = { 'pince-tri':'Pince de tri', 'veine':'Veine preneuse', 'pince-rail':'Pince à rail', 'broyeur':'Broyeur', 'palonnier':'Palonnier' };
+  const equipements = equipIds.filter(id => document.getElementById('eq-'+id)?.checked).map(id => equipLabels[id]);
+
+  // Fioul
+  const fioulFait = document.querySelector('input[name="fioul"]:checked')?.value === 'oui';
+  const fioulLitres = fioulFait ? (parseInt(document.getElementById('fioul-litres').value) || null) : null;
 
   if (!machineId || !hours || !operator || !location) { alert('Veuillez remplir tous les champs obligatoires (*)'); return; }
 
@@ -706,7 +926,6 @@ window.saveChauffeurEntry = async function() {
 
   try {
     const now = new Date();
-    // Enregistrer la saisie dans l'historique
     await addDoc(collection(db, 'operations'), {
       machineId,
       type: 'Saisie chauffeur',
@@ -714,16 +933,17 @@ window.saveChauffeurEntry = async function() {
       date: now.toISOString().split('T')[0],
       operator,
       location,
+      equipements: equipements.length > 0 ? equipements : [],
+      fioulFait,
+      fioulLitres,
       notes: notes || '',
       createdAt: now.toISOString()
     });
 
-    // Mettre à jour les heures de la machine
     if (m && hours > (m.hours || 0)) {
       await updateDoc(doc(db, 'machines', machineId), { hours, location });
     }
 
-    // Si réparations signalées, créer une fiche réparation
     if (repairsText) {
       await addDoc(collection(db, 'repairs'), {
         machineId,
@@ -738,8 +958,16 @@ window.saveChauffeurEntry = async function() {
       });
     }
 
-    ['ch-hours','ch-operator','ch-repairs','ch-notes','ch-location'].forEach(id => document.getElementById(id).value = '');
-    showToast(repairsText ? '✓ Saisie envoyée + réparation signalée au mécanicien !' : '✓ Saisie enregistrée !');
+    // Reset formulaire
+    ['ch-hours','ch-operator','ch-repairs','ch-notes','ch-location','fioul-litres'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+    equipIds.forEach(id => { const el = document.getElementById('eq-'+id); if(el) el.checked = false; });
+    document.getElementById('fioul-non').checked = true;
+    document.getElementById('fioul-litres').style.display = 'none';
+
+    let toastMsg = '✓ Saisie enregistrée !';
+    if (fioulFait) toastMsg += fioulLitres ? ` ⛽ ${fioulLitres}L` : ' ⛽ Plein fait';
+    if (repairsText) toastMsg = '✓ Saisie + réparation signalée au mécanicien !';
+    showToast(toastMsg);
   } catch(e) { alert('Erreur: ' + e.message); }
 };
 
@@ -825,57 +1053,272 @@ window.deleteRepair = async function(id) {
 window.checkAndNotify = function() {
   renderDashboard();
 }
+
+// ---- VIDANGE TYPES ----
+const VIDANGE_INTERVAL = 250;
+
+// Cycle : 1 → 2 → 1 → 3 → 1 → 2 → 1 → 3...
+const VIDANGE_CYCLE = [1, 2, 1, 3]; // se répète indéfiniment
+
+const VIDANGE_TYPES = {
+  1: {
+    label: 'Type 1',
+    color: 'type1',
+    emoji: '🟢',
+    items: [
+      'Filtre à huile moteur primaire',
+      'Huile moteur'
+    ]
+  },
+  2: {
+    label: 'Type 2',
+    color: 'type2',
+    emoji: '🟠',
+    items: [
+      'Filtre à huile moteur primaire',
+      'Filtre à huile moteur secondaire',
+      'Filtre à fuel',
+      'Crépine',
+      'Huile moteur'
+    ]
+  },
+  3: {
+    label: 'Type 3',
+    color: 'type3',
+    emoji: '🔴',
+    items: [
+      'Filtre à huile moteur primaire',
+      'Filtre à huile moteur secondaire',
+      'Filtre à fuel',
+      'Crépine',
+      'Huile moteur',
+      'Vidange barbotins'
+    ]
+  }
+};
+
+function getNextVidangeType(m) {
+  const idx = (m.vidangeTypeIndex || 0) % VIDANGE_CYCLE.length;
+  return VIDANGE_CYCLE[idx];
+}
+
+function getVidangeHoursLeft(m) {
+  const lastVidange = m.lastVidangeHours || 0;
+  const done = (m.hours || 0) - lastVidange;
+  return Math.max(0, VIDANGE_INTERVAL - done);
+}
+
+function isVidangeDue(m) {
+  const lastVidange = m.lastVidangeHours || 0;
+  return (m.hours || 0) - lastVidange >= VIDANGE_INTERVAL;
+}
+
+window.openVidangeModal = function(machineId) {
+  const m = window._machines.find(x => x.id === machineId);
+  if (!m) return;
+  const type = getNextVidangeType(m);
+  const vt = VIDANGE_TYPES[type];
+  window._currentVidangeMachineId = machineId;
+
+  document.getElementById('vidange-modal-title').textContent = `Vidange ${vt.emoji} ${vt.label} -- ${m.name}`;
+  document.getElementById('vidange-modal-sub').textContent = `Dernière vidange à ${m.lastVidangeHours || 0}h · Heures actuelles : ${m.hours || 0}h`;
+
+  // Pense-bête
+  const nextTypeIndex = (m.vidangeTypeIndex || 0) + 1;
+  const nextType = VIDANGE_CYCLE[nextTypeIndex % VIDANGE_CYCLE.length];
+  document.getElementById('vidange-recap-display').innerHTML = `
+    <div class="vidange-recap ${vt.color}">
+      <div class="vidange-recap-title">${vt.emoji} CHECKLIST ${vt.label.toUpperCase()}</div>
+      <ul class="vidange-checklist">
+        ${vt.items.map(i => `<li>${i}</li>`).join('')}
+      </ul>
+      <div class="vidange-next-badge">Prochaine : ${VIDANGE_TYPES[nextType].emoji} ${VIDANGE_TYPES[nextType].label} dans ${VIDANGE_INTERVAL}h</div>
+    </div>`;
+
+  document.getElementById('vid-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('vid-hours').value = m.hours || '';
+  document.getElementById('vid-hours').min = m.hours || 0;
+  document.getElementById('vid-hours-msg').textContent = `Heures actuelles : ${m.hours || 0}h`;
+  document.getElementById('vid-location').value = m.location || '';
+  document.getElementById('vid-operator').value = '';
+  document.getElementById('vid-notes').value = '';
+  openModal('vidange');
+};
+
+window.saveVidange = async function() {
+  const machineId = window._currentVidangeMachineId;
+  const m = window._machines.find(x => x.id === machineId);
+  if (!m) return;
+  const operator = document.getElementById('vid-operator').value.trim();
+  const hours = parseInt(document.getElementById('vid-hours').value);
+  const date = document.getElementById('vid-date').value;
+  const location = document.getElementById('vid-location').value.trim();
+  const notes = document.getElementById('vid-notes').value.trim();
+
+  if (!operator || !hours || !date) { alert('Veuillez remplir tous les champs obligatoires (*)'); return; }
+  if (hours < (m.hours || 0)) { alert(`Les heures (${hours}h) sont inférieures aux heures actuelles (${m.hours}h).`); return; }
+
+  const type = getNextVidangeType(m);
+  const vt = VIDANGE_TYPES[type];
+  const nextTypeIndex = (m.vidangeTypeIndex || 0) + 1;
+
+  try {
+    const { addDoc, collection, doc, updateDoc } = window._fs;
+    const db = window._db;
+
+    // Enregistrer dans l'historique
+    await addDoc(collection(db, 'operations'), {
+      machineId,
+      type: `Vidange ${vt.label}`,
+      typeFree: `${vt.emoji} Vidange ${vt.label} -- ${vt.items.join(', ')}`,
+      hours, date, operator, location,
+      notes: notes || vt.items.join(' | '),
+      vidangeType: type,
+      createdAt: new Date().toISOString()
+    });
+
+    // Mettre à jour la machine : compteur repart des heures RÉELLES de la vidange
+    // Peu importe si c'est en avance, le cycle repart proprement de ces heures
+    await updateDoc(doc(db, 'machines', machineId), {
+      hours,
+      lastVidangeHours: hours,        // Compteur repart de ces heures exactes
+      vidangeTypeIndex: nextTypeIndex, // Passe au type suivant dans le cycle
+      nextService: hours + (m.interval || 500),
+      location: location || m.location
+    });
+
+    closeModal('vidange');
+    const nextVidangeType = VIDANGE_CYCLE[nextTypeIndex % VIDANGE_CYCLE.length];
+    const nextVt = VIDANGE_TYPES[nextVidangeType];
+    showToast(`✓ Vidange ${vt.label} enregistrée ! Prochaine : ${nextVt.emoji} ${nextVt.label} dans ${VIDANGE_INTERVAL}h`);
+  } catch(e) { alert('Erreur: ' + e.message); }
+};
 </script>
 
 <script>
 // ---- PIN SYSTEM ----
-const PINS = { chauffeur: '1234', mecanicien: '5678', admin: '0000' };
-let currentRole = 'chauffeur';
+// ---- PIN SYSTEM (PAR EMPLOYÉ) ----
+const ADMIN_PIN = '0000'; // PIN admin par défaut -- changez-le !
 let pinValue = '';
+let selectedEmployee = null;
+let pinMode = 'employee'; // 'employee' ou 'admin'
 
-function selectRole(role) {
-  currentRole = role;
+function renderEmployeeGrid() {
+  const users = window._users || [];
+  const grid = document.getElementById('employee-grid');
+  if (!grid) return;
+  if (users.length === 0) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:20px;font-size:13px">
+      Aucun employé créé.<br>Connectez-vous en Admin pour en ajouter.
+    </div>`;
+    return;
+  }
+  const roleIcons = { chauffeur: '🚛', mecanicien: '🔧' };
+  const roleLabels = { chauffeur: 'Chauffeur', mecanicien: 'Mécanicien' };
+  grid.innerHTML = users.map(u => `
+    <button class="employee-btn" onclick="selectEmployee('${u.id}')">
+      ${roleIcons[u.role] || '👤'} ${u.name}
+      <span class="emp-role">${roleLabels[u.role] || u.role}</span>
+    </button>`).join('');
+}
+
+function selectEmployee(userId) {
+  const u = (window._users || []).find(x => x.id === userId);
+  if (!u) return;
+  selectedEmployee = u;
+  pinMode = 'employee';
   pinValue = '';
   updatePinDisplay();
-  document.querySelectorAll('.pin-role-btn').forEach((b,i) => b.classList.remove('active'));
-  document.querySelectorAll('.pin-role-btn')[['chauffeur','mecanicien','admin'].indexOf(role)].classList.add('active');
+  document.getElementById('pin-step-employee').style.display = 'none';
+  document.getElementById('pin-step-pin').style.display = 'block';
+  document.getElementById('pin-step-who').textContent = `${u.role === 'chauffeur' ? '🚛' : '🔧'} Bonjour ${u.name} -- entrez votre PIN`;
   document.getElementById('pin-error').textContent = '';
 }
+
+function showAdminLogin() {
+  selectedEmployee = null;
+  pinMode = 'admin';
+  pinValue = '';
+  updatePinDisplay();
+  document.getElementById('pin-step-employee').style.display = 'none';
+  document.getElementById('pin-step-pin').style.display = 'block';
+  document.getElementById('pin-step-who').textContent = '⚙️ Connexion Admin';
+  document.getElementById('pin-error').textContent = '';
+}
+
+function backToEmployeeList() {
+  selectedEmployee = null;
+  pinValue = '';
+  document.getElementById('pin-step-employee').style.display = 'block';
+  document.getElementById('pin-step-pin').style.display = 'none';
+  document.getElementById('pin-error').textContent = '';
+}
+
 function pinKey(k) { if (pinValue.length < 4) { pinValue += k; updatePinDisplay(); } }
 function pinClear() { pinValue = pinValue.slice(0,-1); updatePinDisplay(); }
 function updatePinDisplay() {
   const d = document.getElementById('pin-display');
-  d.textContent = '●'.repeat(pinValue.length) + '·'.repeat(4 - pinValue.length);
-}
-function pinEnter() {
-  if (pinValue === PINS[currentRole]) {
-    document.getElementById('pin-screen').classList.remove('open');
-    applyRole(currentRole);
-  } else {
-    document.getElementById('pin-error').textContent = 'Code PIN incorrect';
-    pinValue = '';
-    updatePinDisplay();
-  }
-}
-function logout() {
-  currentRole = 'chauffeur';
-  pinValue = '';
-  updatePinDisplay();
-  document.getElementById('pin-error').textContent = '';
-  document.querySelectorAll('.pin-role-btn')[0].click();
-  document.getElementById('pin-screen').classList.add('open');
+  if (d) d.textContent = '●'.repeat(pinValue.length) + '·'.repeat(4 - pinValue.length);
 }
 
-function applyRole(role) {
+async function pinEnter() {
+  if (pinMode === 'admin') {
+    if (pinValue === ADMIN_PIN) {
+      document.getElementById('pin-screen').classList.remove('open');
+      applyRole('admin', { name: 'Admin', role: 'admin' });
+    } else {
+      document.getElementById('pin-error').textContent = 'Code PIN incorrect';
+      pinValue = ''; updatePinDisplay();
+    }
+    return;
+  }
+  if (!selectedEmployee) return;
+  const pinStr = String(selectedEmployee.pin);
+  if (pinValue === pinStr) {
+    document.getElementById('pin-screen').classList.remove('open');
+    // Enregistrer la connexion
+    try {
+      const { addDoc, collection, doc, updateDoc } = window._fs;
+      const db = window._db;
+      const now = new Date().toISOString();
+      await addDoc(collection(db, 'connexions'), {
+        userId: selectedEmployee.id,
+        userName: selectedEmployee.name,
+        userRole: selectedEmployee.role,
+        connectedAt: now,
+        date: now.split('T')[0]
+      });
+      await updateDoc(doc(db, 'users', selectedEmployee.id), { lastLogin: now });
+    } catch(e) { console.log('Erreur log connexion:', e); }
+    applyRole(selectedEmployee.role, selectedEmployee);
+  } else {
+    document.getElementById('pin-error').textContent = 'Code PIN incorrect';
+    pinValue = ''; updatePinDisplay();
+  }
+}
+
+function logout() {
+  selectedEmployee = null;
+  pinValue = '';
+  pinMode = 'employee';
+  backToEmployeeList();
+  document.getElementById('pin-screen').classList.add('open');
+  renderEmployeeGrid();
+}
+
+function applyRole(role, user) {
   window._currentRole = role;
+  window._currentUser = user;
   const badge = document.getElementById('role-badge-header');
-  const labels = { chauffeur: '🚛 Chauffeur', mecanicien: '🔧 Mécanicien', admin: '⚙️ Admin' };
-  badge.textContent = labels[role];
+  const name = user ? user.name : 'Admin';
+  badge.textContent = role === 'admin' ? '⚙️ Admin' : (role === 'chauffeur' ? `🚛 ${name}` : `🔧 ${name}`);
   badge.className = 'role-badge ' + role;
 
   // Tabs visibilité
   document.getElementById('tab-btn-reparations').classList.toggle('hidden', role === 'chauffeur');
   document.getElementById('tab-btn-chauffeur').classList.toggle('hidden', role !== 'chauffeur');
+  document.getElementById('tab-btn-users').classList.toggle('hidden', role !== 'admin');
+  document.getElementById('tab-btn-journal').classList.toggle('hidden', role !== 'admin');
   document.getElementById('add-machine-btn').style.display = (role === 'admin') ? '' : 'none';
 
   const mainBtn = document.getElementById('main-action-btn');
@@ -900,19 +1343,139 @@ let currentHistType = 'all';
 let searchVal = '';
 const typeColors = { Vidange:'#f5a623', Filtre:'#3498db', Graissage:'#2ecc71', Courroie:'#9b59b6', Hydraulique:'#e74c3c', Pneu:'#1abc9c', Réparation:'#e74c3c', 'Saisie chauffeur':'#3498db', Autre:'#8890a4' };
 
+// ---- USERS ----
+function renderUsers() {
+  const users = window._users || [];
+  const connexions = window._connexions || [];
+  const div = document.getElementById('users-list');
+  if (!div) return;
+  const roleIcons = { chauffeur: '🚛', mecanicien: '🔧' };
+  const roleLabels = { chauffeur: 'Chauffeur', mecanicien: 'Mécanicien' };
+  if (users.length === 0) {
+    div.innerHTML = '<div class="empty"><div class="empty-icon">👥</div><div>Aucun employé -- ajoutez le premier !</div></div>';
+    return;
+  }
+  div.innerHTML = users.map(u => {
+    const lastCo = connexions.find(c => c.userId === u.id);
+    const nbCo = connexions.filter(c => c.userId === u.id).length;
+    return `<div class="user-card">
+      <div style="flex:1">
+        <div class="user-name">${roleIcons[u.role]||'👤'} ${u.name}</div>
+        <div class="user-meta">${roleLabels[u.role]||u.role} · PIN : ${'●'.repeat(String(u.pin).length)}</div>
+        <div class="user-last-login">${lastCo ? '🟢 Dernière connexion : '+formatDate(lastCo.connectedAt)+' à '+new Date(lastCo.connectedAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}) : '⚪ Jamais connecté'} · ${nbCo} connexion(s)</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn-sm btn-outline" onclick="editUser('${u.id}')">✏️ Modifier</button>
+        <button class="btn-sm btn-danger" onclick="deleteUser('${u.id}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.saveUser = async function() {
+  const name = document.getElementById('u-name').value.trim();
+  const role = document.getElementById('u-role').value;
+  const pin = document.getElementById('u-pin').value.trim();
+  if (!name || !pin) { alert('Veuillez remplir tous les champs'); return; }
+  if (pin.length !== 4 || isNaN(pin)) { alert('Le PIN doit être 4 chiffres'); return; }
+  try {
+    const editId = window._editUserId;
+    if (editId) {
+      await updateDoc(doc(db, 'users', editId), { name, role, pin });
+      showToast('✓ Employé modifié !');
+      window._editUserId = null;
+    } else {
+      await addDoc(collection(db, 'users'), { name, role, pin, createdAt: new Date().toISOString() });
+      showToast('✓ Employé ajouté !');
+    }
+    closeModal('new-user');
+    document.getElementById('u-name').value = '';
+    document.getElementById('u-pin').value = '';
+  } catch(e) { alert('Erreur: ' + e.message); }
+};
+
+window.editUser = function(id) {
+  const u = (window._users || []).find(x => x.id === id);
+  if (!u) return;
+  window._editUserId = id;
+  document.getElementById('user-modal-title').textContent = 'Modifier l\'employé';
+  document.getElementById('u-name').value = u.name;
+  document.getElementById('u-role').value = u.role;
+  document.getElementById('u-pin').value = u.pin;
+  document.getElementById('u-save-btn').textContent = '✓ Enregistrer';
+  openModal('new-user');
+};
+
+window.deleteUser = async function(id) {
+  const u = (window._users || []).find(x => x.id === id);
+  if (!confirm(`Supprimer ${u?.name} ?`)) return;
+  try { await deleteDoc(doc(db, 'users', id)); showToast('Employé supprimé'); } catch(e) { alert('Erreur: ' + e.message); }
+};
+
+// ---- JOURNAL ----
+function updateJournalFilter() {
+  const users = window._users || [];
+  const sel = document.getElementById('journal-filter');
+  if (!sel) return;
+  sel.innerHTML = '<option value="all">Tous les employés</option>' + users.map(u => `<option value="${u.id}">${u.name}</option>`).join('');
+}
+
+function renderJournal() {
+  const connexions = window._connexions || [];
+  const sel = document.getElementById('journal-filter');
+  const filter = sel ? sel.value : 'all';
+  let list = connexions;
+  if (filter !== 'all') list = connexions.filter(c => c.userId === filter);
+
+  const div = document.getElementById('journal-list');
+  if (!div) return;
+  if (list.length === 0) {
+    div.innerHTML = '<div class="empty"><div class="empty-icon">📊</div><div>Aucune connexion enregistrée</div></div>';
+    return;
+  }
+  const roleIcons = { chauffeur: '🚛', mecanicien: '🔧', admin: '⚙️' };
+  div.innerHTML = list.map(c => {
+    const d = new Date(c.connectedAt);
+    const time = d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+    return `<div class="journal-card">
+      <div style="flex:1">
+        <div class="journal-name">${roleIcons[c.userRole]||'👤'} ${c.userName}</div>
+        <div class="journal-meta">${formatDate(c.connectedAt)} à ${time} · ${c.userRole}</div>
+      </div>
+      <span class="badge badge-green">✓ Connecté</span>
+    </div>`;
+  }).join('');
+}
+
 function getMachines() { return window._machines || []; }
 function getOperations() { return window._operations || []; }
 function getRepairs() { return window._repairs || []; }
 
 function getStatus(m) {
+  // Statut entretien général
   const r = m.nextService - m.hours;
   if (r <= 0) return 'danger';
   if (r <= 100) return 'warn';
   return 'ok';
 }
+
+function getVidangeStatus(m) {
+  // Statut spécifique vidange -- tout en rouge dès que ça approche
+  const hoursLeft = getVidangeHoursLeft(m);
+  if (hoursLeft <= 0) return 'danger';   // Dépassé → rouge
+  if (hoursLeft <= 50) return 'danger';  // Moins de 50h → rouge aussi
+  return 'ok';
+}
+
 function getProgress(m) {
   const done = m.interval - Math.max(0, m.nextService - m.hours);
   return Math.min(100, Math.max(0, (done / m.interval) * 100));
+}
+
+function getVidangeProgress(m) {
+  const lastVidange = m.lastVidangeHours || 0;
+  const done = (m.hours || 0) - lastVidange;
+  return Math.min(100, Math.max(0, (done / VIDANGE_INTERVAL) * 100));
 }
 function formatDate(d) {
   if (!d) return '--';
@@ -929,6 +1492,8 @@ function showTab(name) {
   if (name === 'machines') renderMachines();
   if (name === 'historique') renderHistorique();
   if (name === 'reparations') renderRepairs();
+  if (name === 'users') renderUsers();
+  if (name === 'journal') { updateJournalFilter(); renderJournal(); }
 }
 
 // ---- DASHBOARD ----
@@ -1020,7 +1585,7 @@ function renderDashboard() {
       return `<div class="alert-card info" style="border-left-color:var(--accent)">
         <div class="alert-info">
           <div class="alert-machine">${m?m.name:'Machine supprimée'} -- ${o.typeFree||o.type}</div>
-          <div class="alert-desc">${o.hours}h · ${o.operator} · ${formatDate(o.date)}${o.location?' · 📍 '+o.location:''}</div>
+          <div class="alert-desc">${o.hours}h · ${o.operator} · ${formatDate(o.date)}${o.location?' · 📍 '+o.location:''}${o.equipements&&o.equipements.length>0?' · 🔧 '+o.equipements.join(', '):''}${o.fioulFait?' · ⛽'+(o.fioulLitres?' '+o.fioulLitres+'L':''):''}</div>
         </div>
         <span class="badge badge-green">✓</span>
       </div>`;
@@ -1044,6 +1609,11 @@ function renderMachines(search) {
     const lastOp = ops.sort((a,b) => new Date(b.date)-new Date(a.date))[0];
     const pendingReps = getRepairs().filter(rep => rep.machineId === m.id && rep.status === 'pending').length;
     const isAdmin = window._currentRole === 'admin';
+    const vidLeft = getVidangeHoursLeft(m);
+    const vidType = getNextVidangeType(m);
+    const vidVt = VIDANGE_TYPES[vidType];
+    const vidStatus = getVidangeStatus(m);
+    const vidPct = getVidangeProgress(m);
     return `<div class="machine-card" onclick="showDetail('${m.id}')">
       <div class="machine-header">
         <div>
@@ -1059,6 +1629,14 @@ function renderMachines(search) {
       </div>
       <div class="progress-label"><span>Vers prochain entretien</span><span>${r>0?r+'h restantes':'DÉPASSÉ'}</span></div>
       <div class="progress-bar"><div class="progress-fill ${s}" style="width:${pct}%"></div></div>
+
+      <div class="progress-label" style="margin-top:8px">
+        <span>${vidVt.emoji} Vidange ${vidVt.label}</span>
+        <span style="color:${vidStatus==='danger'?'var(--red)':'var(--muted)'}">${vidLeft<=0?'🔴 DÉPASSÉE':''+vidLeft+'h restantes'}</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill danger" style="width:${vidPct}%;background:${vidStatus==='danger'?'var(--red)':'#e67e22'}"></div></div>
+      ${vidLeft<=50?`<div style="font-size:11px;color:var(--red);font-weight:600;margin-bottom:6px">🔴 VIDANGE ${vidVt.label} ${vidLeft<=0?'DÉPASSÉE':'IMMINENTE -- '+vidLeft+'h'}</div>`:''}
+
       <div class="machine-footer">
         <div class="last-op">${lastOp?'Dernier: '+formatDate(lastOp.date):'Aucune opération'}</div>
         <div class="machine-actions">
@@ -1134,7 +1712,11 @@ window.showDetail = function(machineId) {
             <td>${o.hours}h</td><td>${o.operator}</td>
             <td style="color:var(--blue)">${o.location||'--'}</td>
             <td>${o.nextService?o.nextService+'h':'--'}</td>
-            <td style="color:var(--muted);font-size:12px">${o.notes||'--'}</td>
+            <td style="color:var(--muted);font-size:12px">
+              ${o.equipements&&o.equipements.length>0?'<span style="color:var(--accent)">🔧 '+o.equipements.join(', ')+'</span><br>':''}
+              ${o.fioulFait?'<span style="color:var(--green)">⛽ Plein fait'+(o.fioulLitres?' -- '+o.fioulLitres+'L':'')+'</span><br>':''}
+              ${o.notes||''}
+            </td>
             ${isAdmin?`<td><button class="btn-sm btn-danger" onclick="deleteOperation('${o.id}')">🗑</button></td>`:''}
           </tr>`).join('')}
         </tbody>
@@ -1169,7 +1751,11 @@ function renderHistorique(search) {
       <td style="color:var(--blue);font-size:12px">${o.location||'--'}</td>
       <td><span class="op-type"><span class="op-dot" style="background:${typeColors[o.type]||'#888'}"></span>${o.typeFree||o.type}</span></td>
       <td>${o.hours}h</td><td>${o.operator}</td>
-      <td style="color:var(--muted);font-size:12px">${o.notes||'--'}</td>
+      <td style="color:var(--muted);font-size:12px">
+        ${o.equipements&&o.equipements.length>0?'<span style="color:var(--accent)">🔧 '+o.equipements.join(', ')+'</span><br>':''}
+        ${o.fioulFait?'<span style="color:var(--green)">⛽'+(o.fioulLitres?' '+o.fioulLitres+'L':'')+'</span><br>':''}
+        ${o.notes||''}
+      </td>
       ${isAdmin?`<td><button class="btn-sm btn-danger" onclick="deleteOperation('${o.id}')">🗑</button></td>`:''}
     </tr>`;
   }).join('');
@@ -1234,9 +1820,21 @@ function openModal(name) {
     document.getElementById('op-repair-context').textContent = 'Enregistrez l\'intervention réalisée';
     window._currentRepairId = null;
   }
+  if (name==='new-user') {
+    if (!window._editUserId) {
+      document.getElementById('user-modal-title').textContent = 'Ajouter un employé';
+      document.getElementById('u-name').value = '';
+      document.getElementById('u-pin').value = '';
+      document.getElementById('u-role').value = 'chauffeur';
+      document.getElementById('u-save-btn').textContent = '✓ Créer le compte';
+    }
+  }
   document.getElementById('modal-'+name).classList.add('open');
 }
-function closeModal(name) { document.getElementById('modal-'+name).classList.remove('open'); }
+function closeModal(name) {
+  document.getElementById('modal-'+name).classList.remove('open');
+  if (name === 'new-user') window._editUserId = null;
+}
 
 window.openModalForMachine = function(machineId) {
   openModal('new-op');

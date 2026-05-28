@@ -2,8 +2,24 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>MécaTrack -- ULTIM TP</title>
+
+<!-- PWA -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MécaTrack">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0f1117">
+<meta name="description" content="Gestion de flotte ULTIM TP">
+
+<!-- Icône app iPhone -->
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%230f1117' rx='40'/%3E%3Ctext x='50%25' y='55%25' font-family='Arial Black' font-size='72' fill='%23f5a623' text-anchor='middle' dominant-baseline='middle'%3EM%3C/text%3E%3Ctext x='50%25' y='80%25' font-family='Arial' font-size='22' fill='%23f0f0f0' text-anchor='middle'%3EULTIM TP%3C/text%3E%3C/svg%3E">
+
+<!-- Splash screen couleur -->
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+<link rel="manifest" href="data:application/json,%7B%22name%22%3A%22M%C3%A9caTrack%22%2C%22short_name%22%3A%22M%C3%A9caTrack%22%2C%22start_url%22%3A%22.%2Fmecatrack.html%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230f1117%22%2C%22theme_color%22%3A%22%23f5a623%22%7D">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -21,7 +37,8 @@
   --border: #2e3349;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+header { padding-top: env(safe-area-inset-top); }
 
 /* LOADING */
 #loading-screen { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 999; gap: 20px; }
@@ -863,6 +880,10 @@ setTimeout(() => {
 function finishLoad() {
   window._appReady = true;
   document.getElementById('loading-screen').style.display = 'none';
+
+  // Restaurer la session si elle existe
+  if (restoreSession()) return;
+
   renderDashboard();
   renderMachines();
   renderHistorique();
@@ -1453,6 +1474,13 @@ function logout() {
 function applyRole(role, user) {
   window._currentRole = role;
   window._currentUser = user;
+
+  // Sauvegarder la session pour survivre au rechargement
+  try {
+    sessionStorage.setItem('mt_role', role);
+    sessionStorage.setItem('mt_user', JSON.stringify(user));
+  } catch(e) {}
+
   const badge = document.getElementById('role-badge-header');
   const name = user ? user.name : 'Admin';
   badge.textContent = role === 'admin' ? '⚙️ Admin' : (role === 'chauffeur' ? `🚛 ${name}` : `🔧 ${name}`);
@@ -1473,6 +1501,20 @@ function applyRole(role, user) {
   if (role === 'chauffeur') showTab('chauffeur');
   else if (role === 'mecanicien') showTab('reparations');
   else showTab('dashboard');
+}
+
+// Restaurer la session au chargement
+function restoreSession() {
+  try {
+    const savedRole = sessionStorage.getItem('mt_role');
+    const savedUser = JSON.parse(sessionStorage.getItem('mt_user'));
+    if (savedRole && savedUser) {
+      document.getElementById('pin-screen').classList.remove('open');
+      applyRole(savedRole, savedUser);
+      return true;
+    }
+  } catch(e) {}
+  return false;
 }
 
 window.mainAction = function() {

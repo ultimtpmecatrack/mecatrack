@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MécaTrack -- RABASSE TP</title>
+<title>MécaTrack — RABASSE TP</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -250,7 +250,7 @@ td { padding: 12px 14px; vertical-align: middle; }
 <!-- PIN SCREEN -->
 <div id="pin-screen" class="open">
   <div class="pin-logo">MécaTrack</div>
-  <div class="pin-title" id="pin-screen-title">RABASSE TP -- Qui êtes-vous ?</div>
+  <div class="pin-title" id="pin-screen-title">RABASSE TP — Qui êtes-vous ?</div>
 
   <!-- ÉTAPE 1 : Choisir son nom -->
   <div class="pin-step" id="pin-step-employee">
@@ -310,11 +310,11 @@ td { padding: 12px 14px; vertical-align: middle; }
   <div class="page active" id="tab-dashboard">
     <div id="notif-banners"></div>
     <div class="stats-bar">
-      <div class="stat-card orange"><div class="stat-label">Machines</div><div class="stat-value" id="stat-total">--</div></div>
-      <div class="stat-card red"><div class="stat-label">Urgents</div><div class="stat-value" id="stat-urgent">--</div></div>
-      <div class="stat-card orange"><div class="stat-label">À surveiller</div><div class="stat-value" id="stat-warn">--</div></div>
-      <div class="stat-card green"><div class="stat-label">Ops ce mois</div><div class="stat-value" id="stat-ops">--</div></div>
-      <div class="stat-card purple"><div class="stat-label">Réparations</div><div class="stat-value" id="stat-repairs">--</div></div>
+      <div class="stat-card orange"><div class="stat-label">Machines</div><div class="stat-value" id="stat-total">—</div></div>
+      <div class="stat-card red"><div class="stat-label">Urgents</div><div class="stat-value" id="stat-urgent">—</div></div>
+      <div class="stat-card orange"><div class="stat-label">À surveiller</div><div class="stat-value" id="stat-warn">—</div></div>
+      <div class="stat-card green"><div class="stat-label">Ops ce mois</div><div class="stat-value" id="stat-ops">—</div></div>
+      <div class="stat-card purple"><div class="stat-label">Réparations</div><div class="stat-value" id="stat-repairs">—</div></div>
     </div>
     <div class="alerts-section">
       <div class="section-title"><div class="dot"></div> Alertes entretien</div>
@@ -378,6 +378,10 @@ td { padding: 12px 14px; vertical-align: middle; }
         <option value="all">Toutes</option>
       </select>
     </div>
+
+    <!-- VIDANGES DUES -->
+    <div id="vidanges-dues-list"></div>
+
     <div id="repairs-list"></div>
   </div>
 
@@ -499,7 +503,7 @@ td { padding: 12px 14px; vertical-align: middle; }
     <div class="form-group">
       <label class="form-label">Code PIN (4 chiffres) *</label>
       <input class="form-input" type="number" id="u-pin" placeholder="ex: 1234" maxlength="4">
-      <div style="font-size:11px;color:var(--muted);margin-top:4px">Donnez ce code à l'employé -- il sera son mot de passe</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">Donnez ce code à l'employé — il sera son mot de passe</div>
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('new-user')">Annuler</button>
@@ -599,7 +603,7 @@ td { padding: 12px 14px; vertical-align: middle; }
     </div>
 
     <div style="background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.2);border-radius:8px;padding:14px;margin-bottom:16px">
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;color:var(--red);margin-bottom:10px">🔴 Vidange -- Situation actuelle</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;color:var(--red);margin-bottom:10px">🔴 Vidange — Situation actuelle</div>
       <div class="form-row">
         <div class="form-group" style="margin-bottom:0">
           <label class="form-label">Dernière vidange à (heures)</label>
@@ -679,6 +683,37 @@ td { padding: 12px 14px; vertical-align: middle; }
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('close-repair')">Annuler</button>
       <button class="btn" onclick="closeRepair()">✓ Marquer comme fait</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Config vidange machine existante -->
+<div class="modal-overlay" id="modal-config-vidange">
+  <div class="modal">
+    <div class="modal-title">🔴 Configurer la vidange</div>
+    <div class="modal-sub" id="config-vidange-sub">Renseignez la situation actuelle de la machine</div>
+
+    <div style="background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.2);border-radius:8px;padding:14px;margin-bottom:16px">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Ces infos permettent d'afficher le bon type de vidange et le pense-bête automatique.</div>
+      <div class="form-group">
+        <label class="form-label">Dernière vidange effectuée à (heures) *</label>
+        <input class="form-input" type="number" id="cv-last-hours" placeholder="ex: 3500">
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Heures machine au moment de la dernière vidange</div>
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Prochain type de vidange *</label>
+        <select class="form-select" id="cv-type-index">
+          <option value="0">🟢 Type 1 — Filtre huile primaire + Huile moteur</option>
+          <option value="1">🟠 Type 2 — Filtre primaire + secondaire + Fuel + Crépine + Huile</option>
+          <option value="2">🟢 Type 1 — Filtre huile primaire + Huile moteur</option>
+          <option value="3">🔴 Type 3 — Type 2 complet + Vidange barbotins</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('config-vidange')">Annuler</button>
+      <button class="btn" onclick="saveConfigVidange()">✓ Enregistrer</button>
     </div>
   </div>
 </div>
@@ -915,7 +950,7 @@ window.saveMachine = async function() {
   try {
     await addDoc(collection(db, 'machines'), {
       name,
-      serial: serial || '--',
+      serial: serial || '—',
       hours,
       nextService: next,
       interval,
@@ -948,7 +983,7 @@ window.checkVidangeAlert = function() {
   const heuresFaites = currentHours - lastVidange;
   const heuresRestantes = VIDANGE_INTERVAL - heuresFaites;
   const type = getNextVidangeType(m);
-  const vt = VIDANGE_TYPES[type];
+  const vt = VIDANGE_TYPES[type] || VIDANGE_TYPES[1];
 
   if (heuresRestantes <= 0) {
     // VIDANGE DÉPASSÉE
@@ -956,7 +991,7 @@ window.checkVidangeAlert = function() {
     alertDiv.innerHTML = `
       <div style="background:rgba(231,76,60,0.12);border:2px solid var(--red);border-radius:10px;padding:16px">
         <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--red);margin-bottom:10px">
-          🔴 VIDANGE ${vt.label} DÉPASSÉE -- À FAIRE MAINTENANT
+          🔴 VIDANGE ${vt.label} DÉPASSÉE — À FAIRE MAINTENANT
         </div>
         <div style="font-size:13px;color:var(--muted);margin-bottom:10px">
           Dernière vidange à ${lastVidange}h · Heures actuelles : ${currentHours}h · Dépassement : ${Math.abs(heuresRestantes)}h
@@ -1050,7 +1085,7 @@ window.saveChauffeurEntry = async function() {
     if (repairsText) {
       await addDoc(collection(db, 'repairs'), {
         machineId,
-        machineName: m ? m.name : '--',
+        machineName: m ? m.name : '—',
         description: repairsText,
         reportedBy: operator,
         location,
@@ -1080,7 +1115,7 @@ window.openCloseRepair = function(repairId) {
   const r = window._repairs.find(x => x.id === repairId);
   if (!r) return;
   window._currentCloseRepairId = repairId;
-  document.getElementById('close-repair-sub').textContent = r.machineName + ' -- ' + r.description.substring(0,80);
+  document.getElementById('close-repair-sub').textContent = r.machineName + ' — ' + r.description.substring(0,80);
   document.getElementById('cr-date').value = new Date().toISOString().split('T')[0];
   const m = window._machines.find(x => x.id === r.machineId);
   if (m) document.getElementById('cr-hours').value = m.hours || '';
@@ -1193,6 +1228,34 @@ window.checkAndNotify = function() {
   renderDashboard();
 }
 
+// ---- CONFIG VIDANGE MACHINE EXISTANTE ----
+window.openConfigVidange = function(machineId) {
+  const m = window._machines.find(x => x.id === machineId);
+  if (!m) return;
+  window._currentConfigMachineId = machineId;
+  document.getElementById('config-vidange-sub').textContent = `${m.name} — ${m.hours || 0}h actuelles`;
+  document.getElementById('cv-last-hours').value = m.lastVidangeHours || '';
+  document.getElementById('cv-type-index').value = m.vidangeTypeIndex || 0;
+  openModal('config-vidange');
+};
+
+window.saveConfigVidange = async function() {
+  const machineId = window._currentConfigMachineId;
+  const lastHours = parseInt(document.getElementById('cv-last-hours').value);
+  const typeIndex = parseInt(document.getElementById('cv-type-index').value);
+  if (!lastHours) { alert('Veuillez entrer les heures de la dernière vidange'); return; }
+  try {
+    const { doc, updateDoc } = window._fs;
+    const db = window._db;
+    await updateDoc(doc(db, 'machines', machineId), {
+      lastVidangeHours: lastHours,
+      vidangeTypeIndex: typeIndex
+    });
+    closeModal('config-vidange');
+    showToast('✓ Vidange configurée !');
+  } catch(e) { alert('Erreur: ' + e.message); }
+};
+
 // ---- VIDANGE TYPES ----
 // (constantes définies globalement avant ce script)
 
@@ -1200,10 +1263,10 @@ window.openVidangeModal = function(machineId) {
   const m = window._machines.find(x => x.id === machineId);
   if (!m) return;
   const type = getNextVidangeType(m);
-  const vt = VIDANGE_TYPES[type];
+  const vt = VIDANGE_TYPES[type] || VIDANGE_TYPES[1];
   window._currentVidangeMachineId = machineId;
 
-  document.getElementById('vidange-modal-title').textContent = `Vidange ${vt.emoji} ${vt.label} -- ${m.name}`;
+  document.getElementById('vidange-modal-title').textContent = `Vidange ${vt.emoji} ${vt.label} — ${m.name}`;
   document.getElementById('vidange-modal-sub').textContent = `Dernière vidange à ${m.lastVidangeHours || 0}h · Heures actuelles : ${m.hours || 0}h`;
 
   // Pense-bête
@@ -1242,7 +1305,7 @@ window.saveVidange = async function() {
   if (hours < (m.hours || 0)) { alert(`Les heures (${hours}h) sont inférieures aux heures actuelles (${m.hours}h).`); return; }
 
   const type = getNextVidangeType(m);
-  const vt = VIDANGE_TYPES[type];
+  const vt = VIDANGE_TYPES[type] || VIDANGE_TYPES[1];
   const nextTypeIndex = (m.vidangeTypeIndex || 0) + 1;
 
   try {
@@ -1253,7 +1316,7 @@ window.saveVidange = async function() {
     await addDoc(collection(db, 'operations'), {
       machineId,
       type: `Vidange ${vt.label}`,
-      typeFree: `${vt.emoji} Vidange ${vt.label} -- ${vt.items.join(', ')}`,
+      typeFree: `${vt.emoji} Vidange ${vt.label} — ${vt.items.join(', ')}`,
       hours, date, operator, location,
       notes: notes || vt.items.join(' | '),
       vidangeType: type,
@@ -1272,13 +1335,13 @@ window.saveVidange = async function() {
 
     closeModal('vidange');
     const nextVidangeType = VIDANGE_CYCLE[nextTypeIndex % VIDANGE_CYCLE.length];
-    const nextVt = VIDANGE_TYPES[nextVidangeType];
+    const nextVt = VIDANGE_TYPES[nextVidangeType] || VIDANGE_TYPES[1];
     showToast(`✓ Vidange ${vt.label} enregistrée ! Prochaine : ${nextVt.emoji} ${nextVt.label} dans ${VIDANGE_INTERVAL}h`);
   } catch(e) { alert('Erreur: ' + e.message); }
 };
 
 // ---- PIN SYSTEM (PAR EMPLOYÉ) ----
-const ADMIN_PIN = '0000'; // PIN admin par défaut -- changez-le !
+const ADMIN_PIN = '0000'; // PIN admin par défaut — changez-le !
 let pinValue = '';
 let selectedEmployee = null;
 let pinMode = 'employee'; // 'employee' ou 'admin'
@@ -1311,7 +1374,7 @@ function selectEmployee(userId) {
   updatePinDisplay();
   document.getElementById('pin-step-employee').style.display = 'none';
   document.getElementById('pin-step-pin').style.display = 'block';
-  document.getElementById('pin-step-who').textContent = `${u.role === 'chauffeur' ? '🚛' : '🔧'} Bonjour ${u.name} -- entrez votre PIN`;
+  document.getElementById('pin-step-who').textContent = `${u.role === 'chauffeur' ? '🚛' : '🔧'} Bonjour ${u.name} — entrez votre PIN`;
   document.getElementById('pin-error').textContent = '';
 }
 
@@ -1433,7 +1496,7 @@ function renderUsers() {
   const roleIcons = { chauffeur: '🚛', mecanicien: '🔧' };
   const roleLabels = { chauffeur: 'Chauffeur', mecanicien: 'Mécanicien' };
   if (users.length === 0) {
-    div.innerHTML = '<div class="empty"><div class="empty-icon">👥</div><div>Aucun employé -- ajoutez le premier !</div></div>';
+    div.innerHTML = '<div class="empty"><div class="empty-icon">👥</div><div>Aucun employé — ajoutez le premier !</div></div>';
     return;
   }
   div.innerHTML = users.map(u => {
@@ -1518,7 +1581,7 @@ function getProgress(m) {
 }
 
 function formatDate(d) {
-  if (!d) return '--';
+  if (!d) return '—';
   return new Date(d).toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric' });
 }
 
@@ -1565,7 +1628,7 @@ function renderDashboard() {
     banners += `<div class="notif-banner" onclick="openEmailModal('urgent')">
       <div class="notif-icon">🚨</div>
       <div class="notif-text">
-        <div class="notif-title">${urgentMachines.length} machine(s) dépassée(s) -- vidange URGENTE</div>
+        <div class="notif-title">${urgentMachines.length} machine(s) dépassée(s) — vidange URGENTE</div>
         <div class="notif-sub">${urgentMachines.map(m=>m.name).join(', ')} · Cliquez pour envoyer une notification email</div>
       </div>
       <span class="badge badge-red">Notifier</span>
@@ -1575,7 +1638,7 @@ function renderDashboard() {
     banners += `<div class="notif-banner warn-notif" onclick="openEmailModal('warn')">
       <div class="notif-icon">⚠️</div>
       <div class="notif-text">
-        <div class="notif-title">${warnMachines.length} machine(s) à surveiller -- vidange bientôt</div>
+        <div class="notif-title">${warnMachines.length} machine(s) à surveiller — vidange bientôt</div>
         <div class="notif-sub">${warnMachines.map(m=>m.name+' ('+Math.max(0,m.nextService-m.hours)+'h restantes)').join(', ')}</div>
       </div>
       <span class="badge badge-orange">Notifier</span>
@@ -1593,26 +1656,54 @@ function renderDashboard() {
   }
   bannerDiv.innerHTML = banners;
 
-  // ALERTS
+  // ALERTS ENTRETIEN
   const alertsDiv = document.getElementById('alerts-list');
   const alerts = machines.filter(m => getStatus(m) !== 'ok').sort((a,b) => {
     const o = {danger:0,warn:1}; return o[getStatus(a)] - o[getStatus(b)];
   });
-  if (alerts.length === 0) {
-    alertsDiv.innerHTML = '<div style="color:var(--green);font-size:14px;padding:10px 0">✓ Aucune alerte -- tout est à jour !</div>';
+
+  // Vidanges dues — affichées en haut des alertes
+  const vidangesDues = machines.filter(m => {
+    const heuresFaites = (m.hours || 0) - (m.lastVidangeHours || 0);
+    return heuresFaites >= VIDANGE_INTERVAL;
+  });
+
+  let alertsHtml = '';
+
+  if (vidangesDues.length > 0) {
+    alertsHtml += `<div style="margin-bottom:14px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;color:var(--red);margin-bottom:8px">🔴 VIDANGES EN RETARD (${vidangesDues.length})</div>
+      ${vidangesDues.map(m => {
+        const type = getNextVidangeType(m);
+        const vt = VIDANGE_TYPES[type] || VIDANGE_TYPES[1];
+        return `<div class="alert-card" style="border-left-color:var(--red);margin-bottom:8px">
+          <div class="alert-info">
+            <div class="alert-machine">${m.name} ${m.location?'<span style="color:var(--blue);font-size:12px">📍 '+m.location+'</span>':''}</div>
+            <div class="alert-desc">${vt.emoji} ${vt.label} à faire · ${vt.items.join(', ')}</div>
+          </div>
+          <span class="badge badge-red">VIDANGE</span>
+          <button class="btn-sm btn-primary" onclick="openVidangeModal('${m.id}')">Valider</button>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }
+
+  if (alerts.length === 0 && vidangesDues.length === 0) {
+    alertsHtml = '<div style="color:var(--green);font-size:14px;padding:10px 0">✓ Aucune alerte — tout est à jour !</div>';
   } else {
-    alertsDiv.innerHTML = alerts.map(m => {
+    alertsHtml += alerts.map(m => {
       const s = getStatus(m); const r = m.nextService - m.hours;
       return `<div class="alert-card ${s==='warn'?'warning':''}">
         <div class="alert-info">
           <div class="alert-machine">${m.name} ${m.location?'<span style="font-size:12px;color:var(--blue)">📍 '+m.location+'</span>':''}</div>
-          <div class="alert-desc">${r<=0?'⚠ DÉPASSÉ de '+Math.abs(r)+'h':r+'h restantes'} -- Prochain à ${m.nextService}h · Actuel : ${m.hours}h</div>
+          <div class="alert-desc">${r<=0?'⚠ DÉPASSÉ de '+Math.abs(r)+'h':r+'h restantes'} — Prochain à ${m.nextService}h · Actuel : ${m.hours}h</div>
         </div>
         <span class="badge ${s==='danger'?'badge-red':'badge-orange'}">${s==='danger'?'URGENT':'Bientôt'}</span>
         <button class="btn-sm btn-primary" onclick="openModalForMachine('${m.id}')">Saisir</button>
       </div>`;
     }).join('');
   }
+  alertsDiv.innerHTML = alertsHtml;
 
   // RECENT OPS
   const recentDiv = document.getElementById('recent-ops-list');
@@ -1624,7 +1715,7 @@ function renderDashboard() {
       const m = machines.find(x => x.id === o.machineId);
       return `<div class="alert-card info" style="border-left-color:var(--accent)">
         <div class="alert-info">
-          <div class="alert-machine">${m?m.name:'Machine supprimée'} -- ${o.typeFree||o.type}</div>
+          <div class="alert-machine">${m?m.name:'Machine supprimée'} — ${o.typeFree||o.type}</div>
           <div class="alert-desc">${o.hours}h · ${o.operator} · ${formatDate(o.date)}${o.location?' · 📍 '+o.location:''}${o.equipements&&o.equipements.length>0?' · 🔧 '+o.equipements.join(', '):''}${o.fioulFait?' · ⛽'+(o.fioulLitres?' '+o.fioulLitres+'L':''):''}</div>
         </div>
         <span class="badge badge-green">✓</span>
@@ -1651,7 +1742,7 @@ function renderMachines(search) {
     const isAdmin = window._currentRole === 'admin';
     const vidLeft = getVidangeHoursLeft(m);
     const vidType = getNextVidangeType(m);
-    const vidVt = VIDANGE_TYPES[vidType];
+    const vidVt = VIDANGE_TYPES[vidType] || VIDANGE_TYPES[1];
     const vidStatus = getVidangeStatus(m);
     const vidPct = getVidangeProgress(m);
     return `<div class="machine-card" onclick="showDetail('${m.id}')">
@@ -1675,13 +1766,14 @@ function renderMachines(search) {
         <span style="color:${vidStatus==='danger'?'var(--red)':'var(--muted)'}">${vidLeft<=0?'🔴 DÉPASSÉE':''+vidLeft+'h restantes'}</span>
       </div>
       <div class="progress-bar"><div class="progress-fill danger" style="width:${vidPct}%;background:${vidStatus==='danger'?'var(--red)':'#e67e22'}"></div></div>
-      ${vidLeft<=50?`<div style="font-size:11px;color:var(--red);font-weight:600;margin-bottom:6px">🔴 VIDANGE ${vidVt.label} ${vidLeft<=0?'DÉPASSÉE':'IMMINENTE -- '+vidLeft+'h'}</div>`:''}
+      ${vidLeft<=50?`<div style="font-size:11px;color:var(--red);font-weight:600;margin-bottom:6px">🔴 VIDANGE ${vidVt.label} ${vidLeft<=0?'DÉPASSÉE':'IMMINENTE — '+vidLeft+'h'}</div>`:''}
 
       <div class="machine-footer">
         <div class="last-op">${lastOp?'Dernier: '+formatDate(lastOp.date):'Aucune opération'}</div>
         <div class="machine-actions">
           <button class="btn-sm btn-outline" onclick="event.stopPropagation();showDetail('${m.id}')">Détails</button>
           <button class="btn-sm btn-primary" onclick="event.stopPropagation();openModalForMachine('${m.id}')">+ Op.</button>
+          ${isAdmin?`<button class="btn-sm btn-purple" onclick="event.stopPropagation();openConfigVidange('${m.id}')">🔴 Vidange</button>`:''}
           ${isAdmin?`<button class="btn-sm btn-danger" onclick="event.stopPropagation();deleteMachine('${m.id}')">🗑</button>`:''}
         </div>
       </div>
@@ -1704,7 +1796,7 @@ window.showDetail = function(machineId) {
         <button class="back-btn" onclick="showTab('machines')">← Retour</button>
         <div class="detail-title" style="margin-top:10px">${m.name}</div>
         <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:4px">
-          <span style="font-size:13px;color:var(--muted)">N° <strong style="color:var(--text)">${m.serial||'--'}</strong></span>
+          <span style="font-size:13px;color:var(--muted)">N° <strong style="color:var(--text)">${m.serial||'—'}</strong></span>
           <span style="font-size:13px;color:var(--muted)">Intervalle <strong style="color:var(--text)">${m.interval}h</strong></span>
           ${m.location?`<span style="font-size:13px;color:var(--blue)">📍 ${m.location}</span>`:''}
           <span class="badge ${s==='danger'?'badge-red':s==='warn'?'badge-orange':'badge-green'}">${s==='danger'?'URGENT':s==='warn'?'À surveiller':'OK'}</span>
@@ -1750,11 +1842,11 @@ window.showDetail = function(machineId) {
             <td>${formatDate(o.date)}</td>
             <td><span class="op-type"><span class="op-dot" style="background:${typeColors[o.type]||'#888'}"></span>${o.typeFree||o.type}</span></td>
             <td>${o.hours}h</td><td>${o.operator}</td>
-            <td style="color:var(--blue)">${o.location||'--'}</td>
-            <td>${o.nextService?o.nextService+'h':'--'}</td>
+            <td style="color:var(--blue)">${o.location||'—'}</td>
+            <td>${o.nextService?o.nextService+'h':'—'}</td>
             <td style="color:var(--muted);font-size:12px">
               ${o.equipements&&o.equipements.length>0?'<span style="color:var(--accent)">🔧 '+o.equipements.join(', ')+'</span><br>':''}
-              ${o.fioulFait?'<span style="color:var(--green)">⛽ Plein fait'+(o.fioulLitres?' -- '+o.fioulLitres+'L':'')+'</span><br>':''}
+              ${o.fioulFait?'<span style="color:var(--green)">⛽ Plein fait'+(o.fioulLitres?' — '+o.fioulLitres+'L':'')+'</span><br>':''}
               ${o.notes||''}
             </td>
             ${isAdmin?`<td><button class="btn-sm btn-danger" onclick="deleteOperation('${o.id}')">🗑</button></td>`:''}
@@ -1787,8 +1879,8 @@ function renderHistorique(search) {
     const m = machines.find(x=>x.id===o.machineId);
     return `<tr>
       <td>${formatDate(o.date)}</td>
-      <td>${m?m.name:'--'}</td>
-      <td style="color:var(--blue);font-size:12px">${o.location||'--'}</td>
+      <td>${m?m.name:'—'}</td>
+      <td style="color:var(--blue);font-size:12px">${o.location||'—'}</td>
       <td><span class="op-type"><span class="op-dot" style="background:${typeColors[o.type]||'#888'}"></span>${o.typeFree||o.type}</span></td>
       <td>${o.hours}h</td><td>${o.operator}</td>
       <td style="color:var(--muted);font-size:12px">
@@ -1807,6 +1899,53 @@ function renderRepairs() {
   const repairs = getRepairs();
   const machines = getMachines();
   const filter = document.getElementById('repair-filter').value;
+
+  // ---- VIDANGES DUES (toujours affichées en haut) ----
+  const vidDiv = document.getElementById('vidanges-dues-list');
+  if (vidDiv) {
+    const vidancesDues = machines.filter(m => {
+      const lastV = m.lastVidangeHours || 0;
+      const heuresFaites = (m.hours || 0) - lastV;
+      return heuresFaites >= VIDANGE_INTERVAL;
+    });
+
+    if (vidancesDues.length > 0) {
+      vidDiv.innerHTML = `
+        <div class="section-title" style="color:var(--red);margin-bottom:12px">
+          <div class="dot" style="background:var(--red)"></div>
+          🔴 VIDANGES À EFFECTUER (${vidancesDues.length})
+        </div>
+        ${vidancesDues.map(m => {
+          const type = getNextVidangeType(m);
+          const vt = VIDANGE_TYPES[type] || VIDANGE_TYPES[1];
+          const lastV = m.lastVidangeHours || 0;
+          const depassement = (m.hours || 0) - lastV - VIDANGE_INTERVAL;
+          return `<div style="background:rgba(231,76,60,0.08);border:2px solid var(--red);border-radius:10px;padding:16px;margin-bottom:12px">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:10px">
+              <div>
+                <div style="font-weight:700;font-size:16px">${m.name} ${m.location?'<span style="color:var(--blue);font-size:12px">📍 '+m.location+'</span>':''}</div>
+                <div style="font-size:12px;color:var(--muted);margin-top:3px">${m.hours}h actuelles · Dernière vidange à ${lastV}h${depassement > 0 ? ' · <span style="color:var(--red)">Dépassement : '+depassement+'h</span>' : ''}</div>
+              </div>
+              <span class="badge badge-red">${vt.emoji} ${vt.label}</span>
+            </div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1px;color:var(--red);margin-bottom:8px">📋 CHECKLIST ${vt.label.toUpperCase()} :</div>
+            <ul style="list-style:none;padding:0;margin-bottom:10px">
+              ${vt.items.map(i => `<li style="padding:5px 0;font-size:14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,0.05)">
+                <span style="color:var(--red);font-weight:700">✓</span> ${i}
+              </li>`).join('')}
+            </ul>
+            ${(window._currentRole === 'mecanicien' || window._currentRole === 'admin') ? `
+            <button class="btn-sm btn-primary" style="margin-top:4px" onclick="openVidangeModal('${m.id}')">✓ Valider la vidange</button>` : ''}
+          </div>`;
+        }).join('')}`;
+    } else {
+      vidDiv.innerHTML = `<div style="background:rgba(46,204,113,0.08);border:1px solid rgba(46,204,113,0.3);border-radius:10px;padding:14px;margin-bottom:16px;color:var(--green);font-size:14px">
+        ✅ Aucune vidange en retard — tout est à jour !
+      </div>`;
+    }
+  }
+
+  // ---- RÉPARATIONS ----
   let list = repairs;
   if (filter === 'pending') list = repairs.filter(r=>r.status==='pending');
   else if (filter === 'done') list = repairs.filter(r=>r.status==='done');
@@ -1815,7 +1954,7 @@ function renderRepairs() {
   const div = document.getElementById('repairs-list');
   const isMeca = window._currentRole === 'mecanicien' || window._currentRole === 'admin';
   if (list.length === 0) {
-    div.innerHTML = `<div class="empty"><div class="empty-icon">🔧</div><div>${filter==='pending'?'Aucune réparation en attente -- tout est bon !':'Aucune réparation'}</div></div>`;
+    div.innerHTML = `<div class="empty"><div class="empty-icon">🔧</div><div>${filter==='pending'?'Aucune réparation signalée':'Aucune réparation'}</div></div>`;
     return;
   }
   div.innerHTML = list.map(r => {
@@ -1824,7 +1963,7 @@ function renderRepairs() {
     return `<div class="repair-card ${isDone?'repair-done':''}">
       <div class="repair-header">
         <div>
-          <div class="repair-machine-name">${r.machineName||m?.name||'--'} ${m?.location||r.location?'<span style="color:var(--blue);font-size:12px">📍 '+(m?.location||r.location)+'</span>':''}</div>
+          <div class="repair-machine-name">${r.machineName||m?.name||'—'} ${m?.location||r.location?'<span style="color:var(--blue);font-size:12px">📍 '+(m?.location||r.location)+'</span>':''}</div>
           <div class="repair-meta">Signalé par <strong>${r.reportedBy}</strong> le ${formatDate(r.date)} · ${r.hours}h ${isDone?'· Clôturé par <strong>'+r.closedBy+'</strong>':''}</div>
         </div>
         <span class="badge ${isDone?'badge-green':'badge-purple'}">${isDone?'✓ Fait':'En attente'}</span>
@@ -1885,7 +2024,7 @@ window.openModalForMachine = function(machineId) {
     document.getElementById('op-next').value = m.nextService||'';
     document.getElementById('op-location').value = m.location||'';
     // VERROU : on pré-remplit les heures mais on bloque la valeur min
-    document.getElementById('op-hours-locked-msg').textContent = `Heures actuelles : ${m.hours}h -- Vous pouvez uniquement entrer une valeur supérieure ou égale.`;
+    document.getElementById('op-hours-locked-msg').textContent = `Heures actuelles : ${m.hours}h — Vous pouvez uniquement entrer une valeur supérieure ou égale.`;
   }
 };
 
@@ -1895,7 +2034,7 @@ document.getElementById('op-machine').addEventListener('change', function() {
   if (m) {
     document.getElementById('op-hours').min = m.hours;
     document.getElementById('op-hours').value = m.hours;
-    document.getElementById('op-hours-locked-msg').textContent = `Heures actuelles : ${m.hours}h -- Vous pouvez uniquement entrer une valeur supérieure ou égale.`;
+    document.getElementById('op-hours-locked-msg').textContent = `Heures actuelles : ${m.hours}h — Vous pouvez uniquement entrer une valeur supérieure ou égale.`;
     document.getElementById('op-location').value = m.location||'';
     document.getElementById('op-next').value = m.nextService||'';
   }
@@ -1908,7 +2047,7 @@ window.openEmailModal = function(type) {
   const warn = machines.filter(m => getStatus(m) === 'warn');
   const now = new Date().toLocaleDateString('fr-FR', {day:'2-digit',month:'long',year:'numeric'});
 
-  let body = `RABASSE TP -- MécaTrack\nAlerte entretien du ${now}\n\n`;
+  let body = `RABASSE TP — MécaTrack\nAlerte entretien du ${now}\n\n`;
   if (type === 'urgent' && urgent.length > 0) {
     body += `🚨 MACHINES AVEC ENTRETIEN DÉPASSÉ :\n\n`;
     urgent.forEach(m => {
@@ -1919,7 +2058,7 @@ window.openEmailModal = function(type) {
     });
     body += `⚠ Ces machines nécessitent une vidange/entretien IMMÉDIAT.\n`;
   } else {
-    body += `⚠ MACHINES À SURVEILLER -- ENTRETIEN BIENTÔT :\n\n`;
+    body += `⚠ MACHINES À SURVEILLER — ENTRETIEN BIENTÔT :\n\n`;
     warn.forEach(m => {
       const r = m.nextService - m.hours;
       body += `• ${m.name} (${m.serial||m.id})\n`;
@@ -1927,7 +2066,7 @@ window.openEmailModal = function(type) {
       body += `  Heures restantes : ${r}h${m.location?' | Chantier : '+m.location:''}\n\n`;
     });
   }
-  body += `\nMécaTrack -- RABASSE TP`;
+  body += `\nMécaTrack — RABASSE TP`;
 
   document.getElementById('email-preview').textContent = body;
   window._emailBody = body;
@@ -1970,6 +2109,7 @@ window.updateMachineSelects = updateMachineSelects;
 window.updateJournalFilter = updateJournalFilter;
 window.renderEmployeeGrid = renderEmployeeGrid;
 window.checkVidangeAlert = checkVidangeAlert;
+window.openConfigVidange = window.openConfigVidange;
 </script>
 </body>
 </html>

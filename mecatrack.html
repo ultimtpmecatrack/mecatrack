@@ -1325,6 +1325,7 @@ function showAdminLogin() {
   document.getElementById('pin-step-who').textContent = '⚙️ Connexion Admin';
   document.getElementById('pin-error').textContent = '';
 }
+window.showAdminLogin = showAdminLogin;
 
 function backToEmployeeList() {
   selectedEmployee = null;
@@ -1949,6 +1950,26 @@ function showToast(msg) {
   t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3500);
 }
+
+// ---- EXPORTS WINDOW (nécessaires pour les onclick HTML) ----
+window.pinKey = pinKey;
+window.pinClear = pinClear;
+window.pinEnter = pinEnter;
+window.backToEmployeeList = backToEmployeeList;
+window.selectEmployee = selectEmployee;
+window.logout = logout;
+window.showTab = showTab;
+window.openModal = openModal;
+window.closeModal = closeModal;
+window.renderMachines = renderMachines;
+window.renderHistorique = renderHistorique;
+window.renderRepairs = renderRepairs;
+window.renderUsers = renderUsers;
+window.renderJournal = renderJournal;
+window.updateMachineSelects = updateMachineSelects;
+window.updateJournalFilter = updateJournalFilter;
+window.renderEmployeeGrid = renderEmployeeGrid;
+window.checkVidangeAlert = checkVidangeAlert;
 </script>
 </body>
 </html>

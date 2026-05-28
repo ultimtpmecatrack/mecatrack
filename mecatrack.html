@@ -385,10 +385,14 @@ td { padding: 12px 14px; vertical-align: middle; }
   <div class="page" id="tab-chauffeur">
     <div class="chauffeur-form">
       <div class="chauffeur-title">🚛 Saisie rapide chauffeur</div>
+
+      <!-- ALERTE VIDANGE AUTO -->
+      <div id="ch-vidange-alert" style="display:none;margin-bottom:16px"></div>
+
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Machine *</label>
-          <select class="form-select" id="ch-machine"></select>
+          <select class="form-select" id="ch-machine" onchange="checkVidangeAlert()"></select>
         </div>
         <div class="form-group">
           <label class="form-label">Chantier / Lieu *</label>
@@ -398,7 +402,7 @@ td { padding: 12px 14px; vertical-align: middle; }
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Heures compteur *</label>
-          <input class="form-input" type="number" id="ch-hours" placeholder="ex: 1250">
+          <input class="form-input" type="number" id="ch-hours" placeholder="ex: 1250" oninput="checkVidangeAlert()">
         </div>
         <div class="form-group">
           <label class="form-label">Votre nom *</label>
@@ -809,20 +813,23 @@ setTimeout(() => {
 
 function finishLoad() {
   document.getElementById('loading-screen').style.display = 'none';
-  renderAll();
-  updateMachineSelects();
-  renderEmployeeGrid();
+  // Petit délai pour s'assurer que le second script est chargé
+  setTimeout(() => {
+    window.renderAll();
+    if (typeof updateMachineSelects === 'function') updateMachineSelects();
+    if (typeof renderEmployeeGrid === 'function') renderEmployeeGrid();
+  }, 100);
 }
 
 window.renderAll = function() {
-  renderDashboard();
-  renderMachines();
-  renderHistorique();
-  renderRepairs();
-  renderUsers();
-  renderJournal();
-  updateMachineSelects();
-  updateJournalFilter();
+  if (typeof renderDashboard === 'function') renderDashboard();
+  if (typeof renderMachines === 'function') renderMachines();
+  if (typeof renderHistorique === 'function') renderHistorique();
+  if (typeof renderRepairs === 'function') renderRepairs();
+  if (typeof renderUsers === 'function') renderUsers();
+  if (typeof renderJournal === 'function') renderJournal();
+  if (typeof updateMachineSelects === 'function') updateMachineSelects();
+  if (typeof updateJournalFilter === 'function') updateJournalFilter();
 }
 
 // ---- SAVE OPERATION (MÉCANICIEN) ----
@@ -908,7 +915,69 @@ window.saveMachine = async function() {
 };
 
 // ---- SAVE SAISIE CHAUFFEUR ----
-// Afficher/masquer le champ litres fioul
+// ---- ALERTE VIDANGE AUTOMATIQUE (saisie chauffeur) ----
+window.checkVidangeAlert = function() {
+  const machineId = document.getElementById('ch-machine').value;
+  const hoursInput = parseInt(document.getElementById('ch-hours').value) || 0;
+  const alertDiv = document.getElementById('ch-vidange-alert');
+  if (!machineId || !alertDiv) return;
+
+  const m = window._machines.find(x => x.id === machineId);
+  if (!m) { alertDiv.style.display = 'none'; return; }
+
+  const currentHours = hoursInput > 0 ? hoursInput : (m.hours || 0);
+  const lastVidange = m.lastVidangeHours || 0;
+  const heuresFaites = currentHours - lastVidange;
+  const heuresRestantes = VIDANGE_INTERVAL - heuresFaites;
+  const type = getNextVidangeType(m);
+  const vt = VIDANGE_TYPES[type];
+
+  if (heuresRestantes <= 0) {
+    // VIDANGE DÉPASSÉE
+    alertDiv.style.display = 'block';
+    alertDiv.innerHTML = `
+      <div style="background:rgba(231,76,60,0.12);border:2px solid var(--red);border-radius:10px;padding:16px">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--red);margin-bottom:10px">
+          🔴 VIDANGE ${vt.label} DÉPASSÉE -- À FAIRE MAINTENANT
+        </div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:10px">
+          Dernière vidange à ${lastVidange}h · Heures actuelles : ${currentHours}h · Dépassement : ${Math.abs(heuresRestantes)}h
+        </div>
+        <div style="font-weight:600;font-size:13px;color:var(--text);margin-bottom:8px">📋 CE QU'IL FAUT FAIRE :</div>
+        <ul style="list-style:none;padding:0">
+          ${vt.items.map(i => `<li style="padding:5px 0;font-size:14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,0.05)">
+            <span style="color:var(--red);font-weight:700;font-size:16px">✓</span> ${i}
+          </li>`).join('')}
+        </ul>
+        <div style="margin-top:12px;font-size:12px;color:var(--muted);font-style:italic">
+          ⚠ Signalez cette vidange au mécanicien ou effectuez-la maintenant
+        </div>
+      </div>`;
+  } else if (heuresRestantes <= 50) {
+    // VIDANGE IMMINENTE
+    alertDiv.style.display = 'block';
+    alertDiv.innerHTML = `
+      <div style="background:rgba(243,156,18,0.08);border:2px solid var(--orange);border-radius:10px;padding:16px">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--orange);margin-bottom:10px">
+          ⚠ VIDANGE ${vt.label} DANS ${heuresRestantes}H
+        </div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:10px">
+          Dernière vidange à ${lastVidange}h · Heures actuelles : ${currentHours}h
+        </div>
+        <div style="font-weight:600;font-size:13px;color:var(--text);margin-bottom:8px">📋 CE QUI SERA À FAIRE :</div>
+        <ul style="list-style:none;padding:0">
+          ${vt.items.map(i => `<li style="padding:5px 0;font-size:14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,0.05)">
+            <span style="color:var(--orange);font-weight:700;font-size:16px">→</span> ${i}
+          </li>`).join('')}
+        </ul>
+        <div style="margin-top:12px;font-size:12px;color:var(--muted);font-style:italic">
+          Prévenez le mécanicien pour préparer les pièces
+        </div>
+      </div>`;
+  } else {
+    alertDiv.style.display = 'none';
+  }
+};
 document.querySelectorAll('input[name="fioul"]').forEach(r => {
   r.addEventListener('change', function() {
     document.getElementById('fioul-litres').style.display = this.value === 'oui' ? 'block' : 'none';

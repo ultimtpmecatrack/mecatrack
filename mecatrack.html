@@ -1049,6 +1049,42 @@ window.deleteRepair = async function(id) {
   try { await deleteDoc(doc(db, 'repairs', id)); showToast('Fiche supprimée'); } catch(e) { alert('Erreur: ' + e.message); }
 };
 
+// ---- USERS (dans le bloc Firebase pour accès à addDoc/db) ----
+window.saveUser = async function() {
+  const name = document.getElementById('u-name').value.trim();
+  const role = document.getElementById('u-role').value;
+  const pin = document.getElementById('u-pin').value.trim();
+  if (!name || !pin) { alert('Veuillez remplir tous les champs'); return; }
+  if (pin.length !== 4 || isNaN(pin)) { alert('Le PIN doit être 4 chiffres'); return; }
+  try {
+    const { addDoc, collection, doc, updateDoc } = window._fs;
+    const db = window._db;
+    const editId = window._editUserId;
+    if (editId) {
+      await updateDoc(doc(db, 'users', editId), { name, role, pin });
+      showToast('✓ Employé modifié !');
+      window._editUserId = null;
+    } else {
+      await addDoc(collection(db, 'users'), { name, role, pin, createdAt: new Date().toISOString() });
+      showToast('✓ Employé ajouté !');
+    }
+    closeModal('new-user');
+    document.getElementById('u-name').value = '';
+    document.getElementById('u-pin').value = '';
+  } catch(e) { alert('Erreur: ' + e.message); }
+};
+
+window.deleteUser = async function(id) {
+  const u = (window._users || []).find(x => x.id === id);
+  if (!confirm(`Supprimer ${u?.name} ?`)) return;
+  try {
+    const { deleteDoc, doc } = window._fs;
+    const db = window._db;
+    await deleteDoc(doc(db, 'users', id));
+    showToast('Employé supprimé');
+  } catch(e) { alert('Erreur: ' + e.message); }
+};
+
 // Notif email
 window.checkAndNotify = function() {
   renderDashboard();
@@ -1372,28 +1408,6 @@ function renderUsers() {
   }).join('');
 }
 
-window.saveUser = async function() {
-  const name = document.getElementById('u-name').value.trim();
-  const role = document.getElementById('u-role').value;
-  const pin = document.getElementById('u-pin').value.trim();
-  if (!name || !pin) { alert('Veuillez remplir tous les champs'); return; }
-  if (pin.length !== 4 || isNaN(pin)) { alert('Le PIN doit être 4 chiffres'); return; }
-  try {
-    const editId = window._editUserId;
-    if (editId) {
-      await updateDoc(doc(db, 'users', editId), { name, role, pin });
-      showToast('✓ Employé modifié !');
-      window._editUserId = null;
-    } else {
-      await addDoc(collection(db, 'users'), { name, role, pin, createdAt: new Date().toISOString() });
-      showToast('✓ Employé ajouté !');
-    }
-    closeModal('new-user');
-    document.getElementById('u-name').value = '';
-    document.getElementById('u-pin').value = '';
-  } catch(e) { alert('Erreur: ' + e.message); }
-};
-
 window.editUser = function(id) {
   const u = (window._users || []).find(x => x.id === id);
   if (!u) return;
@@ -1404,12 +1418,6 @@ window.editUser = function(id) {
   document.getElementById('u-pin').value = u.pin;
   document.getElementById('u-save-btn').textContent = '✓ Enregistrer';
   openModal('new-user');
-};
-
-window.deleteUser = async function(id) {
-  const u = (window._users || []).find(x => x.id === id);
-  if (!confirm(`Supprimer ${u?.name} ?`)) return;
-  try { await deleteDoc(doc(db, 'users', id)); showToast('Employé supprimé'); } catch(e) { alert('Erreur: ' + e.message); }
 };
 
 // ---- JOURNAL ----

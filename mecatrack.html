@@ -3,206 +3,295 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MécaTrack — RABASSE TP</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>MécaTrack -- RABASSE TP</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0f1117;
-    --surface: #1a1d27;
-    --surface2: #22263a;
-    --accent: #f5a623;
-    --green: #2ecc71;
-    --red: #e74c3c;
-    --orange: #f39c12;
-    --text: #f0f0f0;
-    --muted: #8890a4;
-    --border: #2e3349;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+:root {
+  --bg: #0f1117;
+  --surface: #1a1d27;
+  --surface2: #22263a;
+  --accent: #f5a623;
+  --green: #2ecc71;
+  --red: #e74c3c;
+  --orange: #f39c12;
+  --blue: #3498db;
+  --purple: #9b59b6;
+  --text: #f0f0f0;
+  --muted: #8890a4;
+  --border: #2e3349;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
 
-  /* LOADING */
-  #loading-screen {
-    position: fixed; inset: 0; background: var(--bg);
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    z-index: 999; gap: 20px;
-  }
-  .spinner {
-    width: 48px; height: 48px; border: 4px solid var(--border);
-    border-top-color: var(--accent); border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
+/* LOADING */
+#loading-screen { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 999; gap: 20px; }
+.spinner { width: 48px; height: 48px; border: 4px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-  /* HEADER */
-  header {
-    background: var(--surface); border-bottom: 2px solid var(--accent);
-    padding: 0 24px; height: 64px; display: flex; align-items: center;
-    justify-content: space-between; position: sticky; top: 0; z-index: 100;
-  }
-  .logo { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 3px; color: var(--accent); }
-  .logo span { color: var(--text); }
-  .logo small { font-family: 'DM Sans', sans-serif; font-size: 11px; color: var(--muted); display: block; letter-spacing: 1px; margin-top: -4px; }
-  .btn { background: var(--accent); color: #000; border: none; padding: 10px 18px; border-radius: 6px; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s; }
-  .btn:hover { background: #ffc04a; }
-  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
-  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); background: transparent; }
+/* PIN SCREEN */
+#pin-screen { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 500; align-items: center; justify-content: center; flex-direction: column; gap: 24px; }
+#pin-screen.open { display: flex; }
+.pin-logo { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 4px; color: var(--accent); }
+.pin-title { font-size: 16px; color: var(--muted); letter-spacing: 1px; }
+.pin-roles { display: flex; gap: 12px; }
+.pin-role-btn { padding: 12px 24px; border-radius: 10px; border: 2px solid var(--border); background: var(--surface); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.pin-role-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(245,166,35,0.08); }
+.pin-pad { display: grid; grid-template-columns: repeat(3, 72px); gap: 10px; }
+.pin-display { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 12px; color: var(--accent); min-height: 48px; text-align: center; }
+.pin-key { width: 72px; height: 72px; border-radius: 50%; border: 2px solid var(--border); background: var(--surface); color: var(--text); font-size: 22px; font-weight: 600; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; }
+.pin-key:hover { border-color: var(--accent); color: var(--accent); }
+.pin-key.clear { color: var(--red); border-color: rgba(231,76,60,0.3); }
+.pin-key.enter { background: var(--accent); color: #000; border-color: var(--accent); }
+.pin-error { color: var(--red); font-size: 14px; font-weight: 600; min-height: 20px; }
 
-  /* TABS */
-  .nav-tabs { display: flex; gap: 4px; padding: 20px 24px 0; border-bottom: 1px solid var(--border); overflow-x: auto; }
-  .tab { padding: 10px 18px; border-radius: 8px 8px 0 0; cursor: pointer; font-size: 14px; font-weight: 500; color: var(--muted); border: 1px solid transparent; border-bottom: none; transition: all 0.2s; white-space: nowrap; }
-  .tab.active { background: var(--surface); color: var(--accent); border-color: var(--border); border-bottom: 1px solid var(--surface); margin-bottom: -1px; }
+/* HEADER */
+header { background: var(--surface); border-bottom: 2px solid var(--accent); padding: 0 24px; height: 64px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.logo { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 3px; color: var(--accent); }
+.logo span { color: var(--text); }
+.logo small { font-family: 'DM Sans', sans-serif; font-size: 11px; color: var(--muted); display: block; letter-spacing: 1px; margin-top: -4px; }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.role-badge { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; letter-spacing: 1px; }
+.role-badge.chauffeur { background: rgba(52,152,219,0.15); color: var(--blue); border: 1px solid rgba(52,152,219,0.3); }
+.role-badge.mecanicien { background: rgba(155,89,182,0.15); color: var(--purple); border: 1px solid rgba(155,89,182,0.3); }
+.role-badge.admin { background: rgba(245,166,35,0.15); color: var(--accent); border: 1px solid rgba(245,166,35,0.3); }
+.btn { background: var(--accent); color: #000; border: none; padding: 10px 18px; border-radius: 6px; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s; }
+.btn:hover { background: #ffc04a; }
+.btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); background: transparent; }
 
-  main { padding: 24px; max-width: 1200px; margin: 0 auto; }
-  .page { display: none; }
-  .page.active { display: block; }
+/* TABS */
+.nav-tabs { display: flex; gap: 4px; padding: 20px 24px 0; border-bottom: 1px solid var(--border); overflow-x: auto; }
+.tab { padding: 10px 18px; border-radius: 8px 8px 0 0; cursor: pointer; font-size: 14px; font-weight: 500; color: var(--muted); border: 1px solid transparent; border-bottom: none; transition: all 0.2s; white-space: nowrap; }
+.tab.active { background: var(--surface); color: var(--accent); border-color: var(--border); border-bottom: 1px solid var(--surface); margin-bottom: -1px; }
+.tab.hidden { display: none; }
+main { padding: 24px; max-width: 1200px; margin: 0 auto; }
+.page { display: none; }
+.page.active { display: block; }
 
-  /* STATS */
-  .stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; margin-bottom: 28px; }
-  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; position: relative; overflow: hidden; }
-  .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
-  .stat-card.orange::before { background: var(--accent); }
-  .stat-card.red::before { background: var(--red); }
-  .stat-card.green::before { background: var(--green); }
-  .stat-card.blue::before { background: #3498db; }
-  .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 6px; }
-  .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 34px; line-height: 1; }
-  .stat-card.orange .stat-value { color: var(--accent); }
-  .stat-card.red .stat-value { color: var(--red); }
-  .stat-card.green .stat-value { color: var(--green); }
-  .stat-card.blue .stat-value { color: #3498db; }
+/* STATS */
+.stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; margin-bottom: 28px; }
+.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; position: relative; overflow: hidden; }
+.stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+.stat-card.orange::before { background: var(--accent); }
+.stat-card.red::before { background: var(--red); }
+.stat-card.green::before { background: var(--green); }
+.stat-card.blue::before { background: var(--blue); }
+.stat-card.purple::before { background: var(--purple); }
+.stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 6px; }
+.stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 34px; line-height: 1; }
+.stat-card.orange .stat-value { color: var(--accent); }
+.stat-card.red .stat-value { color: var(--red); }
+.stat-card.green .stat-value { color: var(--green); }
+.stat-card.blue .stat-value { color: var(--blue); }
+.stat-card.purple .stat-value { color: var(--purple); }
 
-  /* ALERTS */
-  .section-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 2px; color: var(--muted); margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
-  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-  .alert-card { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-  .alert-card.warning { border-left-color: var(--orange); }
-  .alert-info { flex: 1; min-width: 180px; }
-  .alert-machine { font-weight: 600; font-size: 15px; }
-  .alert-desc { font-size: 13px; color: var(--muted); margin-top: 2px; }
-  .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
-  .badge-red { background: rgba(231,76,60,0.15); color: var(--red); border: 1px solid rgba(231,76,60,0.3); }
-  .badge-orange { background: rgba(243,156,18,0.15); color: var(--orange); border: 1px solid rgba(243,156,18,0.3); }
-  .badge-green { background: rgba(46,204,113,0.15); color: var(--green); border: 1px solid rgba(46,204,113,0.3); }
+/* ALERTS */
+.section-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 2px; color: var(--muted); margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.alert-card { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--red); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.alert-card.warning { border-left-color: var(--orange); }
+.alert-card.info { border-left-color: var(--blue); }
+.alert-card.repair { border-left-color: var(--purple); }
+.alert-info { flex: 1; min-width: 180px; }
+.alert-machine { font-weight: 600; font-size: 15px; }
+.alert-desc { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+.badge-red { background: rgba(231,76,60,0.15); color: var(--red); border: 1px solid rgba(231,76,60,0.3); }
+.badge-orange { background: rgba(243,156,18,0.15); color: var(--orange); border: 1px solid rgba(243,156,18,0.3); }
+.badge-green { background: rgba(46,204,113,0.15); color: var(--green); border: 1px solid rgba(46,204,113,0.3); }
+.badge-blue { background: rgba(52,152,219,0.15); color: var(--blue); border: 1px solid rgba(52,152,219,0.3); }
+.badge-purple { background: rgba(155,89,182,0.15); color: var(--purple); border: 1px solid rgba(155,89,182,0.3); }
 
-  /* MACHINES */
-  .toolbar { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; align-items: center; }
-  .search-box { flex: 1; min-width: 180px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color 0.2s; }
-  .search-box:focus { border-color: var(--accent); }
-  .search-box::placeholder { color: var(--muted); }
-  select.filter-select { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; cursor: pointer; }
+/* MACHINES */
+.toolbar { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; align-items: center; }
+.search-box { flex: 1; min-width: 180px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color 0.2s; }
+.search-box:focus { border-color: var(--accent); }
+.search-box::placeholder { color: var(--muted); }
+select.filter-select { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; cursor: pointer; }
+.machines-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.machine-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; cursor: pointer; transition: all 0.2s; }
+.machine-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+.machine-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+.machine-name { font-weight: 600; font-size: 15px; }
+.machine-id { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.machine-location { font-size: 12px; color: var(--blue); margin-top: 3px; }
+.machine-hours { font-family: 'Bebas Neue', sans-serif; font-size: 30px; color: var(--accent); line-height: 1; text-align: right; }
+.machine-hours span { display: block; font-family: 'DM Sans', sans-serif; font-size: 10px; color: var(--muted); font-weight: 400; text-transform: uppercase; letter-spacing: 1px; }
+.progress-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 5px; }
+.progress-bar { height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; margin-bottom: 12px; }
+.progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+.progress-fill.ok { background: var(--green); }
+.progress-fill.warn { background: var(--orange); }
+.progress-fill.danger { background: var(--red); }
+.machine-footer { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+.last-op { font-size: 12px; color: var(--muted); }
+.machine-actions { display: flex; gap: 6px; }
+.btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 5px; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 600; transition: all 0.15s; }
+.btn-primary { background: var(--accent); color: #000; }
+.btn-primary:hover { background: #ffc04a; }
+.btn-outline { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+.btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+.btn-danger { background: transparent; color: var(--red); border: 1px solid rgba(231,76,60,0.3); }
+.btn-danger:hover { background: rgba(231,76,60,0.1); }
+.btn-purple { background: rgba(155,89,182,0.15); color: var(--purple); border: 1px solid rgba(155,89,182,0.3); }
+.btn-purple:hover { background: rgba(155,89,182,0.25); }
 
-  .machines-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
-  .machine-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; cursor: pointer; transition: all 0.2s; }
-  .machine-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
-  .machine-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-  .machine-name { font-weight: 600; font-size: 15px; }
-  .machine-id { font-size: 12px; color: var(--muted); margin-top: 2px; }
-  .machine-hours { font-family: 'Bebas Neue', sans-serif; font-size: 30px; color: var(--accent); line-height: 1; text-align: right; }
-  .machine-hours span { display: block; font-family: 'DM Sans', sans-serif; font-size: 10px; color: var(--muted); font-weight: 400; text-transform: uppercase; letter-spacing: 1px; }
-  .progress-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 5px; }
-  .progress-bar { height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; margin-bottom: 12px; }
-  .progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
-  .progress-fill.ok { background: var(--green); }
-  .progress-fill.warn { background: var(--orange); }
-  .progress-fill.danger { background: var(--red); }
-  .machine-footer { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
-  .last-op { font-size: 12px; color: var(--muted); }
-  .machine-actions { display: flex; gap: 6px; }
-  .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 5px; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 600; transition: all 0.15s; }
-  .btn-primary { background: var(--accent); color: #000; }
-  .btn-primary:hover { background: #ffc04a; }
-  .btn-outline { background: transparent; color: var(--muted); border: 1px solid var(--border); }
-  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
-  .btn-danger { background: transparent; color: var(--red); border: 1px solid rgba(231,76,60,0.3); }
-  .btn-danger:hover { background: rgba(231,76,60,0.1); }
+/* MODAL */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); z-index: 200; align-items: center; justify-content: center; padding: 16px; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 520px; max-height: 92vh; overflow-y: auto; padding: 24px; animation: slideUp 0.25s ease; }
+@keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
+.modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 2px; margin-bottom: 4px; color: var(--accent); }
+.modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+.form-group { margin-bottom: 16px; }
+.form-label { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 5px; display: block; }
+.form-input, .form-select, .form-textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 13px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color 0.2s; }
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
+.form-input:disabled { opacity: 0.5; cursor: not-allowed; background: var(--surface2); }
+.form-textarea { resize: vertical; min-height: 72px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+.modal-actions .btn { flex: 1; padding: 12px; font-size: 14px; }
+.hours-locked { display: flex; align-items: center; gap: 8px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 13px; font-size: 14px; color: var(--accent); font-family: 'Bebas Neue', sans-serif; font-size: 22px; }
+.hours-locked .lock-icon { font-size: 14px; color: var(--muted); margin-left: auto; }
+.locked-info { font-size: 11px; color: var(--muted); margin-top: 4px; }
 
-  /* MODAL */
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); z-index: 200; align-items: center; justify-content: center; padding: 16px; }
-  .modal-overlay.open { display: flex; }
-  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 500px; max-height: 92vh; overflow-y: auto; padding: 24px; animation: slideUp 0.25s ease; }
-  @keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
-  .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 2px; margin-bottom: 4px; color: var(--accent); }
-  .modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
-  .form-group { margin-bottom: 16px; }
-  .form-label { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 5px; display: block; }
-  .form-input, .form-select, .form-textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 13px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color 0.2s; }
-  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
-  .form-textarea { resize: vertical; min-height: 72px; }
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
-  .modal-actions .btn { flex: 1; padding: 12px; font-size: 14px; }
+/* TABLE */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th { background: var(--surface2); padding: 11px 14px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); border-bottom: 1px solid var(--border); }
+tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+tbody tr:hover { background: var(--surface2); }
+td { padding: 12px 14px; vertical-align: middle; }
+.op-type { display: inline-flex; align-items: center; gap: 6px; font-weight: 500; }
+.op-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
-  /* TABLE */
-  .table-wrap { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  thead th { background: var(--surface2); padding: 11px 14px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); border-bottom: 1px solid var(--border); }
-  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
-  tbody tr:hover { background: var(--surface2); }
-  td { padding: 12px 14px; vertical-align: middle; }
-  .op-type { display: inline-flex; align-items: center; gap: 6px; font-weight: 500; }
-  .op-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+/* RÉPARATIONS / TABLEAU MÉCANICIEN */
+.repair-card { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--purple); border-radius: 10px; padding: 16px; margin-bottom: 12px; }
+.repair-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.repair-machine-name { font-weight: 600; font-size: 15px; }
+.repair-meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.repair-desc { font-size: 13px; color: var(--text); background: var(--surface2); border-radius: 6px; padding: 10px; margin-bottom: 10px; line-height: 1.5; }
+.repair-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.repair-done { opacity: 0.5; }
+.repair-done .repair-desc { text-decoration: line-through; }
 
-  /* DETAIL */
-  .detail-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap; gap: 14px; }
-  .detail-title { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 3px; }
-  .detail-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 20px; }
-  .detail-stat { background: var(--surface2); border-radius: 8px; padding: 13px; text-align: center; }
-  .detail-stat .val { font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: var(--accent); }
-  .detail-stat .lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
-  .back-btn { background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 7px 14px; border-radius: 6px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 13px; transition: all 0.2s; }
-  .back-btn:hover { border-color: var(--accent); color: var(--accent); }
+/* DETAIL */
+.detail-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap; gap: 14px; }
+.detail-title { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 3px; }
+.detail-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 20px; }
+.detail-stat { background: var(--surface2); border-radius: 8px; padding: 13px; text-align: center; }
+.detail-stat .val { font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: var(--accent); }
+.detail-stat .lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+.back-btn { background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 7px 14px; border-radius: 6px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 13px; transition: all 0.2s; }
+.back-btn:hover { border-color: var(--accent); color: var(--accent); }
+.empty { text-align: center; padding: 50px 20px; color: var(--muted); }
+.empty-icon { font-size: 44px; margin-bottom: 10px; opacity: 0.4; }
 
-  .empty { text-align: center; padding: 50px 20px; color: var(--muted); }
-  .empty-icon { font-size: 44px; margin-bottom: 10px; opacity: 0.4; }
+/* TOAST */
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--green); color: #000; padding: 12px 24px; border-radius: 30px; font-weight: 600; font-size: 14px; z-index: 999; opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap; }
+.toast.show { opacity: 1; }
 
-  /* TOAST */
-  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--green); color: #000; padding: 12px 24px; border-radius: 30px; font-weight: 600; font-size: 14px; z-index: 999; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
-  .toast.show { opacity: 1; }
+/* NOTIF BANNER */
+.notif-banner { background: rgba(231,76,60,0.1); border: 1px solid rgba(231,76,60,0.3); border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+.notif-banner:hover { background: rgba(231,76,60,0.15); }
+.notif-banner .notif-icon { font-size: 24px; flex-shrink: 0; }
+.notif-banner .notif-text { flex: 1; }
+.notif-banner .notif-title { font-weight: 600; color: var(--red); }
+.notif-banner .notif-sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.notif-banner.warn-notif { background: rgba(243,156,18,0.08); border-color: rgba(243,156,18,0.3); }
+.notif-banner.warn-notif .notif-title { color: var(--orange); }
 
-  @media (max-width: 600px) {
-    .form-row { grid-template-columns: 1fr; }
-    .stats-bar { grid-template-columns: 1fr 1fr; }
-    main { padding: 14px; }
-    header { padding: 0 14px; }
-    .nav-tabs { padding: 14px 14px 0; }
-  }
+/* EMAIL MODAL */
+.email-preview { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px; font-size: 13px; color: var(--text); line-height: 1.7; white-space: pre-wrap; max-height: 280px; overflow-y: auto; }
+
+/* SAISIE CHAUFFEUR */
+.chauffeur-form { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+.chauffeur-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 2px; color: var(--blue); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+
+@media (max-width: 600px) {
+  .form-row { grid-template-columns: 1fr; }
+  .stats-bar { grid-template-columns: 1fr 1fr; }
+  main { padding: 14px; }
+  header { padding: 0 14px; }
+  .nav-tabs { padding: 14px 14px 0; }
+  .pin-pad { grid-template-columns: repeat(3, 64px); gap: 8px; }
+  .pin-key { width: 64px; height: 64px; font-size: 20px; }
+}
 </style>
 </head>
 <body>
 
+<!-- LOADING -->
 <div id="loading-screen">
   <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:4px;color:var(--accent)">MécaTrack</div>
   <div class="spinner"></div>
   <div style="color:var(--muted);font-size:13px">Connexion à la base de données...</div>
 </div>
 
+<!-- PIN SCREEN -->
+<div id="pin-screen" class="open">
+  <div class="pin-logo">MécaTrack</div>
+  <div class="pin-title">RABASSE TP -- Sélectionnez votre rôle</div>
+  <div class="pin-roles">
+    <button class="pin-role-btn active" onclick="selectRole('chauffeur')">🚛 Chauffeur</button>
+    <button class="pin-role-btn" onclick="selectRole('mecanicien')">🔧 Mécanicien</button>
+    <button class="pin-role-btn" onclick="selectRole('admin')">⚙️ Admin</button>
+  </div>
+  <div class="pin-display" id="pin-display">····</div>
+  <div class="pin-pad">
+    <button class="pin-key" onclick="pinKey('1')">1</button>
+    <button class="pin-key" onclick="pinKey('2')">2</button>
+    <button class="pin-key" onclick="pinKey('3')">3</button>
+    <button class="pin-key" onclick="pinKey('4')">4</button>
+    <button class="pin-key" onclick="pinKey('5')">5</button>
+    <button class="pin-key" onclick="pinKey('6')">6</button>
+    <button class="pin-key" onclick="pinKey('7')">7</button>
+    <button class="pin-key" onclick="pinKey('8')">8</button>
+    <button class="pin-key" onclick="pinKey('9')">9</button>
+    <button class="pin-key clear" onclick="pinClear()">⌫</button>
+    <button class="pin-key" onclick="pinKey('0')">0</button>
+    <button class="pin-key enter" onclick="pinEnter()">✓</button>
+  </div>
+  <div class="pin-error" id="pin-error"></div>
+</div>
+
+<!-- HEADER -->
 <header>
   <div class="logo">Méca<span>Track</span><small>RABASSE TP</small></div>
-  <button class="btn" onclick="openModal('new-op')">+ Entretien</button>
+  <div class="header-right">
+    <span class="role-badge" id="role-badge-header"></span>
+    <button class="btn" id="main-action-btn" onclick="mainAction()">+ Saisie</button>
+    <button class="btn btn-ghost" onclick="logout()" style="padding:8px 12px;font-size:13px">🔒</button>
+  </div>
 </header>
 
-<div class="nav-tabs">
-  <div class="tab active" onclick="showTab('dashboard')">🏠 Tableau de bord</div>
-  <div class="tab" onclick="showTab('machines')">🚧 Machines</div>
-  <div class="tab" onclick="showTab('historique')">📋 Historique</div>
+<!-- TABS -->
+<div class="nav-tabs" id="nav-tabs">
+  <div class="tab active" id="tab-btn-dashboard" onclick="showTab('dashboard')">🏠 Tableau de bord</div>
+  <div class="tab" id="tab-btn-machines" onclick="showTab('machines')">🚧 Machines</div>
+  <div class="tab" id="tab-btn-historique" onclick="showTab('historique')">📋 Historique</div>
+  <div class="tab hidden" id="tab-btn-reparations" onclick="showTab('reparations')">🔧 Réparations</div>
+  <div class="tab hidden" id="tab-btn-chauffeur" onclick="showTab('chauffeur')">🚛 Ma saisie</div>
 </div>
 
 <main>
   <!-- DASHBOARD -->
   <div class="page active" id="tab-dashboard">
+    <div id="notif-banners"></div>
     <div class="stats-bar">
-      <div class="stat-card orange"><div class="stat-label">Machines</div><div class="stat-value" id="stat-total">—</div></div>
-      <div class="stat-card red"><div class="stat-label">Urgents</div><div class="stat-value" id="stat-urgent">—</div></div>
-      <div class="stat-card orange"><div class="stat-label">À surveiller</div><div class="stat-value" id="stat-warn">—</div></div>
-      <div class="stat-card green"><div class="stat-label">Ops ce mois</div><div class="stat-value" id="stat-ops">—</div></div>
+      <div class="stat-card orange"><div class="stat-label">Machines</div><div class="stat-value" id="stat-total">--</div></div>
+      <div class="stat-card red"><div class="stat-label">Urgents</div><div class="stat-value" id="stat-urgent">--</div></div>
+      <div class="stat-card orange"><div class="stat-label">À surveiller</div><div class="stat-value" id="stat-warn">--</div></div>
+      <div class="stat-card green"><div class="stat-label">Ops ce mois</div><div class="stat-value" id="stat-ops">--</div></div>
+      <div class="stat-card purple"><div class="stat-label">Réparations</div><div class="stat-value" id="stat-repairs">--</div></div>
     </div>
     <div class="alerts-section">
       <div class="section-title"><div class="dot"></div> Alertes entretien</div>
       <div id="alerts-list"></div>
     </div>
-    <div class="section-title" style="margin-bottom:12px">Dernières opérations</div>
+    <div class="section-title" style="margin-bottom:12px;margin-top:24px">Dernières opérations</div>
     <div id="recent-ops-list"></div>
   </div>
 
@@ -216,7 +305,7 @@
         <option value="warn">À surveiller</option>
         <option value="ok">OK</option>
       </select>
-      <button class="btn" onclick="openModal('new-machine')">+ Machine</button>
+      <button class="btn" id="add-machine-btn" onclick="openModal('new-machine')">+ Machine</button>
     </div>
     <div class="machines-grid" id="machines-grid"></div>
   </div>
@@ -235,15 +324,67 @@
         <option value="Graissage">Graissage</option>
         <option value="Courroie">Courroie</option>
         <option value="Hydraulique">Hydraulique</option>
+        <option value="Pneu">Pneu</option>
+        <option value="Réparation">Réparation</option>
+        <option value="Saisie chauffeur">Saisie chauffeur</option>
         <option value="Autre">Autre</option>
       </select>
     </div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Date</th><th>Machine</th><th>Type</th><th>Heures</th><th>Opérateur</th><th>Notes</th><th></th></tr></thead>
+        <thead><tr><th>Date</th><th>Machine</th><th>Chantier</th><th>Type</th><th>Heures</th><th>Par</th><th>Notes</th><th></th></tr></thead>
         <tbody id="hist-tbody"></tbody>
       </table>
       <div id="hist-empty" class="empty" style="display:none"><div class="empty-icon">📋</div><div>Aucune opération</div></div>
+    </div>
+  </div>
+
+  <!-- RÉPARATIONS (MÉCANICIEN) -->
+  <div class="page" id="tab-reparations">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+      <div class="section-title" style="margin:0"><div class="dot" style="background:var(--purple)"></div> Tableau mécanicien</div>
+      <select class="filter-select" id="repair-filter" onchange="renderRepairs()">
+        <option value="pending">À faire</option>
+        <option value="done">Terminées</option>
+        <option value="all">Toutes</option>
+      </select>
+    </div>
+    <div id="repairs-list"></div>
+  </div>
+
+  <!-- SAISIE CHAUFFEUR -->
+  <div class="page" id="tab-chauffeur">
+    <div class="chauffeur-form">
+      <div class="chauffeur-title">🚛 Saisie rapide chauffeur</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Machine *</label>
+          <select class="form-select" id="ch-machine"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Chantier / Lieu *</label>
+          <input class="form-input" type="text" id="ch-location" placeholder="ex: Chantier A13">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Heures compteur *</label>
+          <input class="form-input" type="number" id="ch-hours" placeholder="ex: 1250">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Votre nom *</label>
+          <input class="form-input" type="text" id="ch-operator" placeholder="Prénom Nom">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Réparations à signaler</label>
+        <textarea class="form-textarea" id="ch-repairs" placeholder="Ex: Fuite hydraulique côté droit, voyant moteur allumé..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes complémentaires</label>
+        <textarea class="form-textarea" id="ch-notes" placeholder="Observations, remarques..."></textarea>
+      </div>
+      <button class="btn" style="width:100%;padding:14px;font-size:15px" onclick="saveChauffeurEntry()">✓ Envoyer ma saisie</button>
     </div>
   </div>
 
@@ -251,31 +392,26 @@
   <div class="page" id="tab-detail"><div id="detail-content"></div></div>
 </main>
 
-<!-- MODAL: Entretien -->
+<!-- MODAL: Entretien mécanicien -->
 <div class="modal-overlay" id="modal-new-op">
   <div class="modal">
-    <div class="modal-title">Saisir un entretien</div>
-    <div class="modal-sub">Enregistrez l'opération effectuée</div>
+    <div class="modal-title">Saisir une intervention</div>
+    <div class="modal-sub" id="op-repair-context"></div>
     <div class="form-group">
       <label class="form-label">Machine *</label>
       <select class="form-select" id="op-machine"></select>
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">Type d'opération *</label>
-        <select class="form-select" id="op-type">
-          <option value="Vidange">Vidange huile</option>
-          <option value="Filtre">Changement filtre</option>
-          <option value="Graissage">Graissage</option>
-          <option value="Courroie">Courroie / chaîne</option>
-          <option value="Hydraulique">Hydraulique</option>
-          <option value="Pneu">Pneu / chenille</option>
-          <option value="Autre">Autre</option>
-        </select>
+        <label class="form-label">Type d'intervention *</label>
+        <input class="form-input" type="text" id="op-type-free" placeholder="ex: Vidange, Filtre, Réparation...">
       </div>
       <div class="form-group">
         <label class="form-label">Heures machine *</label>
-        <input class="form-input" type="number" id="op-hours" placeholder="ex: 1250">
+        <div id="op-hours-container">
+          <input class="form-input" type="number" id="op-hours" placeholder="ex: 1250">
+        </div>
+        <div class="locked-info" id="op-hours-locked-msg"></div>
       </div>
     </div>
     <div class="form-row">
@@ -289,12 +425,21 @@
       </div>
     </div>
     <div class="form-group">
+      <label class="form-label">Chantier / Lieu</label>
+      <input class="form-input" type="text" id="op-location" placeholder="ex: Chantier A13">
+    </div>
+    <div class="form-group">
       <label class="form-label">Prochain entretien (heures)</label>
       <input class="form-input" type="number" id="op-next" placeholder="ex: 1750">
     </div>
     <div class="form-group">
-      <label class="form-label">Notes / pièces changées</label>
-      <textarea class="form-textarea" id="op-notes" placeholder="Filtre à huile Ref. XX..."></textarea>
+      <label class="form-label">Pièces changées / Détail intervention</label>
+      <textarea class="form-textarea" id="op-notes" placeholder="Filtre à huile Ref. XX, joints..."></textarea>
+    </div>
+    <div id="repair-complete-section" style="display:none">
+      <div style="padding:10px;background:rgba(155,89,182,0.08);border:1px solid rgba(155,89,182,0.3);border-radius:8px;font-size:13px;color:var(--purple);margin-bottom:14px">
+        🔧 Cette intervention clôt une réparation signalée
+      </div>
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('new-op')">Annuler</button>
@@ -329,12 +474,73 @@
       </div>
     </div>
     <div class="form-group">
+      <label class="form-label">Chantier actuel</label>
+      <input class="form-input" type="text" id="m-location" placeholder="ex: Chantier A13">
+    </div>
+    <div class="form-group">
       <label class="form-label">Prochain entretien (heures)</label>
       <input class="form-input" type="number" id="m-next" placeholder="ex: 1500">
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('new-machine')">Annuler</button>
       <button class="btn" onclick="saveMachine()">✓ Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Email notification -->
+<div class="modal-overlay" id="modal-email">
+  <div class="modal">
+    <div class="modal-title">📧 Envoyer notification</div>
+    <div class="modal-sub">Prévisualisation de l'email d'alerte</div>
+    <div class="form-group">
+      <label class="form-label">Destinataire(s)</label>
+      <input class="form-input" type="email" id="email-to" placeholder="mecanicien@rabasse-tp.fr">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Aperçu du message</label>
+      <div class="email-preview" id="email-preview"></div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px">
+      💡 Copiez et envoyez via votre messagerie ou intégrez un service SMTP.
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('email')">Fermer</button>
+      <button class="btn" onclick="copyEmail()">📋 Copier le message</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Clôturer réparation -->
+<div class="modal-overlay" id="modal-close-repair">
+  <div class="modal">
+    <div class="modal-title">✓ Clôturer la réparation</div>
+    <div class="modal-sub" id="close-repair-sub"></div>
+    <div class="form-group">
+      <label class="form-label">Type d'intervention réalisée *</label>
+      <input class="form-input" type="text" id="cr-type" placeholder="Ex: Remplacement joint hydraulique...">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Heures machine *</label>
+        <input class="form-input" type="number" id="cr-hours" placeholder="Heures actuelles">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Date *</label>
+        <input class="form-input" type="date" id="cr-date">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Mécanicien *</label>
+      <input class="form-input" type="text" id="cr-operator" placeholder="Votre nom">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Pièces utilisées / détails</label>
+      <textarea class="form-textarea" id="cr-notes" placeholder="Joint ref. XX, 2h de main d'œuvre..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('close-repair')">Annuler</button>
+      <button class="btn" onclick="closeRepair()">✓ Marquer comme fait</button>
     </div>
   </div>
 </div>
@@ -357,82 +563,106 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-
 window._db = db;
-window._col = { machines: 'machines', operations: 'operations' };
+window._col = { machines: 'machines', operations: 'operations', repairs: 'repairs', chauffeur: 'chauffeur_entries' };
 window._fs = { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, onSnapshot, query, orderBy };
 
-// Live listeners
-let machines = [];
-let operations = [];
+let machines = [], operations = [], repairs = [], chauffeurEntries = [];
 window._machines = machines;
 window._operations = operations;
+window._repairs = repairs;
+window._chauffeurEntries = chauffeurEntries;
 
 onSnapshot(collection(db, 'machines'), snap => {
   machines.length = 0;
   snap.forEach(d => machines.push({ id: d.id, ...d.data() }));
-  window._machines = machines;
-  if (window._appReady) {
-    renderDashboard();
-    renderMachines();
-    renderHistorique();
-    updateMachineSelects();
-  }
+  if (window._appReady) { renderAll(); }
 });
 
 onSnapshot(query(collection(db, 'operations'), orderBy('date', 'desc')), snap => {
   operations.length = 0;
   snap.forEach(d => operations.push({ id: d.id, ...d.data() }));
-  window._operations = operations;
-  if (window._appReady) {
-    renderDashboard();
-    renderHistorique();
-  }
-  // Hide loading after first data load
-  if (!window._appReady) {
-    window._appReady = true;
-    document.getElementById('loading-screen').style.display = 'none';
-    renderDashboard();
-    renderMachines();
-    renderHistorique();
-    updateMachineSelects();
-  }
+  if (window._appReady) { renderAll(); }
+  if (!window._appReady) { window._appReady = true; finishLoad(); }
 });
 
-// Fallback hide loading after 4s if no data yet
+onSnapshot(collection(db, 'repairs'), snap => {
+  repairs.length = 0;
+  snap.forEach(d => repairs.push({ id: d.id, ...d.data() }));
+  if (window._appReady) { renderAll(); }
+});
+
+onSnapshot(query(collection(db, 'chauffeur_entries'), orderBy('date', 'desc')), snap => {
+  chauffeurEntries.length = 0;
+  snap.forEach(d => chauffeurEntries.push({ id: d.id, ...d.data() }));
+  if (window._appReady) { renderAll(); }
+});
+
 setTimeout(() => {
-  if (!window._appReady) {
-    window._appReady = true;
-    document.getElementById('loading-screen').style.display = 'none';
-    renderDashboard(); renderMachines(); renderHistorique(); updateMachineSelects();
-  }
+  if (!window._appReady) { window._appReady = true; finishLoad(); }
 }, 4000);
 
-// ---- SAVE OPERATION ----
+function finishLoad() {
+  document.getElementById('loading-screen').style.display = 'none';
+  renderAll();
+  updateMachineSelects();
+}
+
+window.renderAll = function() {
+  renderDashboard();
+  renderMachines();
+  renderHistorique();
+  renderRepairs();
+  updateMachineSelects();
+}
+
+// ---- SAVE OPERATION (MÉCANICIEN) ----
 window.saveOperation = async function() {
   const machineId = document.getElementById('op-machine').value;
-  const type = document.getElementById('op-type').value;
-  const hours = parseInt(document.getElementById('op-hours').value);
+  const type = document.getElementById('op-type-free').value.trim();
+  const hoursInput = document.getElementById('op-hours');
+  const hours = parseInt(hoursInput.value);
   const date = document.getElementById('op-date').value;
   const operator = document.getElementById('op-operator').value.trim();
   const nextService = parseInt(document.getElementById('op-next').value) || null;
   const notes = document.getElementById('op-notes').value.trim();
-  if (!machineId || !hours || !date || !operator) { alert('Veuillez remplir tous les champs obligatoires (*)'); return; }
+  const location = document.getElementById('op-location').value.trim();
+
+  if (!machineId || !type || !hours || !date || !operator) { alert('Veuillez remplir tous les champs obligatoires (*)'); return; }
+
+  const m = window._machines.find(x => x.id === machineId);
+  // VERROU HEURES : on accepte uniquement >= heures actuelles
+  if (m && hours < (m.hours || 0)) {
+    alert(`Les heures saisies (${hours}h) sont inférieures aux heures actuelles de la machine (${m.hours}h). Impossible de modifier des heures déjà enregistrées.`);
+    return;
+  }
+
   try {
     const { addDoc, collection, doc, updateDoc } = window._fs;
     const db = window._db;
-    await addDoc(collection(db, 'operations'), { machineId, type, hours, date, operator, nextService, notes, createdAt: new Date().toISOString() });
-    // Update machine hours + nextService
-    const m = window._machines.find(x => x.id === machineId);
+    await addDoc(collection(db, 'operations'), {
+      machineId, type, hours, date, operator, nextService, notes, location,
+      createdAt: new Date().toISOString()
+    });
     if (m) {
       const updates = {};
       if (hours > (m.hours || 0)) updates.hours = hours;
       if (nextService) updates.nextService = nextService;
+      if (location) updates.location = location;
       if (Object.keys(updates).length) await updateDoc(doc(db, 'machines', machineId), updates);
     }
+
+    // Si c'est suite à une réparation, la clôturer
+    const repairId = window._currentRepairId;
+    if (repairId) {
+      await updateDoc(doc(db, 'repairs', repairId), { status: 'done', closedAt: new Date().toISOString(), closedBy: operator });
+      window._currentRepairId = null;
+    }
+
     closeModal('new-op');
-    ['op-hours','op-operator','op-next','op-notes'].forEach(id => document.getElementById(id).value = '');
-    showToast('✓ Opération enregistrée !');
+    ['op-type-free','op-hours','op-operator','op-next','op-notes','op-location'].forEach(id => document.getElementById(id).value = '');
+    showToast('✓ Intervention enregistrée !');
+    checkAndNotify();
   } catch(e) { alert('Erreur: ' + e.message); }
 };
 
@@ -443,47 +673,236 @@ window.saveMachine = async function() {
   const hours = parseInt(document.getElementById('m-hours').value) || 0;
   const interval = parseInt(document.getElementById('m-interval').value) || 500;
   const next = parseInt(document.getElementById('m-next').value) || hours + interval;
+  const location = document.getElementById('m-location').value.trim();
   if (!name) { alert('Veuillez entrer un nom de machine'); return; }
   try {
-    await addDoc(collection(db, 'machines'), { name, serial: serial || '—', hours, nextService: next, interval, createdAt: new Date().toISOString() });
+    await addDoc(collection(db, 'machines'), {
+      name, serial: serial || '--', hours, nextService: next, interval, location: location || '',
+      createdAt: new Date().toISOString()
+    });
     closeModal('new-machine');
-    ['m-name','m-serial','m-hours','m-next'].forEach(id => document.getElementById(id).value = '');
+    ['m-name','m-serial','m-hours','m-next','m-location'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('m-interval').value = '500';
     showToast('✓ Machine ajoutée !');
   } catch(e) { alert('Erreur: ' + e.message); }
 };
 
-// ---- DELETE OPERATION ----
-window.deleteOperation = async function(id) {
-  if (!confirm('Supprimer cette opération ?')) return;
+// ---- SAVE SAISIE CHAUFFEUR ----
+window.saveChauffeurEntry = async function() {
+  const machineId = document.getElementById('ch-machine').value;
+  const location = document.getElementById('ch-location').value.trim();
+  const hours = parseInt(document.getElementById('ch-hours').value);
+  const operator = document.getElementById('ch-operator').value.trim();
+  const repairsText = document.getElementById('ch-repairs').value.trim();
+  const notes = document.getElementById('ch-notes').value.trim();
+
+  if (!machineId || !hours || !operator || !location) { alert('Veuillez remplir tous les champs obligatoires (*)'); return; }
+
+  const m = window._machines.find(x => x.id === machineId);
+  if (m && hours < (m.hours || 0)) {
+    alert(`Les heures saisies (${hours}h) sont inférieures aux heures actuelles (${m.hours}h). Vérifiez votre compteur.`);
+    return;
+  }
+
   try {
-    await deleteDoc(doc(db, 'operations', id));
-    showToast('Opération supprimée');
+    const now = new Date();
+    // Enregistrer la saisie dans l'historique
+    await addDoc(collection(db, 'operations'), {
+      machineId,
+      type: 'Saisie chauffeur',
+      hours,
+      date: now.toISOString().split('T')[0],
+      operator,
+      location,
+      notes: notes || '',
+      createdAt: now.toISOString()
+    });
+
+    // Mettre à jour les heures de la machine
+    if (m && hours > (m.hours || 0)) {
+      await updateDoc(doc(db, 'machines', machineId), { hours, location });
+    }
+
+    // Si réparations signalées, créer une fiche réparation
+    if (repairsText) {
+      await addDoc(collection(db, 'repairs'), {
+        machineId,
+        machineName: m ? m.name : '--',
+        description: repairsText,
+        reportedBy: operator,
+        location,
+        hours,
+        date: now.toISOString().split('T')[0],
+        status: 'pending',
+        createdAt: now.toISOString()
+      });
+    }
+
+    ['ch-hours','ch-operator','ch-repairs','ch-notes','ch-location'].forEach(id => document.getElementById(id).value = '');
+    showToast(repairsText ? '✓ Saisie envoyée + réparation signalée au mécanicien !' : '✓ Saisie enregistrée !');
   } catch(e) { alert('Erreur: ' + e.message); }
 };
 
-// ---- DELETE MACHINE ----
+// ---- CLOSE REPAIR (mécanicien) ----
+window._currentCloseRepairId = null;
+window.openCloseRepair = function(repairId) {
+  const r = window._repairs.find(x => x.id === repairId);
+  if (!r) return;
+  window._currentCloseRepairId = repairId;
+  document.getElementById('close-repair-sub').textContent = r.machineName + ' -- ' + r.description.substring(0,80);
+  document.getElementById('cr-date').value = new Date().toISOString().split('T')[0];
+  const m = window._machines.find(x => x.id === r.machineId);
+  if (m) document.getElementById('cr-hours').value = m.hours || '';
+  openModal('close-repair');
+};
+
+window.closeRepair = async function() {
+  const repairId = window._currentCloseRepairId;
+  if (!repairId) return;
+  const type = document.getElementById('cr-type').value.trim();
+  const hours = parseInt(document.getElementById('cr-hours').value);
+  const date = document.getElementById('cr-date').value;
+  const operator = document.getElementById('cr-operator').value.trim();
+  const notes = document.getElementById('cr-notes').value.trim();
+
+  if (!type || !hours || !date || !operator) { alert('Veuillez remplir tous les champs obligatoires (*)'); return; }
+
+  const r = window._repairs.find(x => x.id === repairId);
+  if (!r) return;
+
+  const m = window._machines.find(x => x.id === r.machineId);
+  if (m && hours < (m.hours || 0)) {
+    alert(`Les heures (${hours}h) sont inférieures aux heures actuelles (${m.hours}h).`);
+    return;
+  }
+
+  try {
+    // Enregistrer l'intervention dans l'historique
+    await addDoc(collection(db, 'operations'), {
+      machineId: r.machineId,
+      type: 'Réparation',
+      typeFree: type,
+      hours, date, operator, notes,
+      location: r.location || '',
+      repairRef: repairId,
+      createdAt: new Date().toISOString()
+    });
+    // Clôturer la réparation
+    await updateDoc(doc(db, 'repairs', repairId), { status: 'done', closedAt: new Date().toISOString(), closedBy: operator, closedType: type });
+    // Mettre à jour heures
+    if (m && hours > (m.hours || 0)) {
+      await updateDoc(doc(db, 'machines', r.machineId), { hours });
+    }
+    closeModal('close-repair');
+    ['cr-type','cr-hours','cr-operator','cr-notes'].forEach(id => document.getElementById(id).value = '');
+    showToast('✓ Réparation clôturée et enregistrée !');
+  } catch(e) { alert('Erreur: ' + e.message); }
+};
+
+// ---- DELETE ----
+window.deleteOperation = async function(id) {
+  if (!confirm('Supprimer cette opération ?')) return;
+  try { await deleteDoc(doc(db, 'operations', id)); showToast('Opération supprimée'); } catch(e) { alert('Erreur: ' + e.message); }
+};
 window.deleteMachine = async function(id) {
   if (!confirm('Supprimer cette machine et tout son historique ?')) return;
   try {
     await deleteDoc(doc(db, 'machines', id));
-    // delete related operations
     const ops = window._operations.filter(o => o.machineId === id);
     for (const o of ops) await deleteDoc(doc(db, 'operations', o.id));
+    const reps = window._repairs.filter(r => r.machineId === id);
+    for (const r of reps) await deleteDoc(doc(db, 'repairs', r.id));
     showToast('Machine supprimée');
     showTab('machines');
   } catch(e) { alert('Erreur: ' + e.message); }
 };
+window.deleteRepair = async function(id) {
+  if (!confirm('Supprimer cette fiche réparation ?')) return;
+  try { await deleteDoc(doc(db, 'repairs', id)); showToast('Fiche supprimée'); } catch(e) { alert('Erreur: ' + e.message); }
+};
 
+// Notif email
+window.checkAndNotify = function() {
+  renderDashboard();
+}
 </script>
 
 <script>
+// ---- PIN SYSTEM ----
+const PINS = { chauffeur: '1234', mecanicien: '5678', admin: '0000' };
+let currentRole = 'chauffeur';
+let pinValue = '';
+
+function selectRole(role) {
+  currentRole = role;
+  pinValue = '';
+  updatePinDisplay();
+  document.querySelectorAll('.pin-role-btn').forEach((b,i) => b.classList.remove('active'));
+  document.querySelectorAll('.pin-role-btn')[['chauffeur','mecanicien','admin'].indexOf(role)].classList.add('active');
+  document.getElementById('pin-error').textContent = '';
+}
+function pinKey(k) { if (pinValue.length < 4) { pinValue += k; updatePinDisplay(); } }
+function pinClear() { pinValue = pinValue.slice(0,-1); updatePinDisplay(); }
+function updatePinDisplay() {
+  const d = document.getElementById('pin-display');
+  d.textContent = '●'.repeat(pinValue.length) + '·'.repeat(4 - pinValue.length);
+}
+function pinEnter() {
+  if (pinValue === PINS[currentRole]) {
+    document.getElementById('pin-screen').classList.remove('open');
+    applyRole(currentRole);
+  } else {
+    document.getElementById('pin-error').textContent = 'Code PIN incorrect';
+    pinValue = '';
+    updatePinDisplay();
+  }
+}
+function logout() {
+  currentRole = 'chauffeur';
+  pinValue = '';
+  updatePinDisplay();
+  document.getElementById('pin-error').textContent = '';
+  document.querySelectorAll('.pin-role-btn')[0].click();
+  document.getElementById('pin-screen').classList.add('open');
+}
+
+function applyRole(role) {
+  window._currentRole = role;
+  const badge = document.getElementById('role-badge-header');
+  const labels = { chauffeur: '🚛 Chauffeur', mecanicien: '🔧 Mécanicien', admin: '⚙️ Admin' };
+  badge.textContent = labels[role];
+  badge.className = 'role-badge ' + role;
+
+  // Tabs visibilité
+  document.getElementById('tab-btn-reparations').classList.toggle('hidden', role === 'chauffeur');
+  document.getElementById('tab-btn-chauffeur').classList.toggle('hidden', role !== 'chauffeur');
+  document.getElementById('add-machine-btn').style.display = (role === 'admin') ? '' : 'none';
+
+  const mainBtn = document.getElementById('main-action-btn');
+  if (role === 'chauffeur') { mainBtn.textContent = '+ Ma saisie'; }
+  else if (role === 'mecanicien') { mainBtn.textContent = '+ Intervention'; }
+  else { mainBtn.textContent = '+ Entretien'; }
+
+  if (role === 'chauffeur') showTab('chauffeur');
+  else if (role === 'mecanicien') showTab('reparations');
+  else showTab('dashboard');
+}
+
+window.mainAction = function() {
+  const role = window._currentRole || 'admin';
+  if (role === 'chauffeur') showTab('chauffeur');
+  else openModal('new-op');
+};
+
+// ---- STATE ----
 let currentFilter = 'all';
 let currentHistType = 'all';
 let searchVal = '';
+const typeColors = { Vidange:'#f5a623', Filtre:'#3498db', Graissage:'#2ecc71', Courroie:'#9b59b6', Hydraulique:'#e74c3c', Pneu:'#1abc9c', Réparation:'#e74c3c', 'Saisie chauffeur':'#3498db', Autre:'#8890a4' };
 
 function getMachines() { return window._machines || []; }
 function getOperations() { return window._operations || []; }
+function getRepairs() { return window._repairs || []; }
 
 function getStatus(m) {
   const r = m.nextService - m.hours;
@@ -496,25 +915,27 @@ function getProgress(m) {
   return Math.min(100, Math.max(0, (done / m.interval) * 100));
 }
 function formatDate(d) {
-  if (!d) return '—';
+  if (!d) return '--';
   return new Date(d).toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric' });
 }
-const typeColors = { Vidange:'#f5a623', Filtre:'#3498db', Graissage:'#2ecc71', Courroie:'#9b59b6', Hydraulique:'#e74c3c', Pneu:'#1abc9c', Autre:'#8890a4' };
 
 function showTab(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
-  const idx = ['dashboard','machines','historique'].indexOf(name);
-  if (idx >= 0) document.querySelectorAll('.tab')[idx].classList.add('active');
+  const btn = document.getElementById('tab-btn-' + name);
+  if (btn) btn.classList.add('active');
   if (name === 'dashboard') renderDashboard();
   if (name === 'machines') renderMachines();
   if (name === 'historique') renderHistorique();
+  if (name === 'reparations') renderRepairs();
 }
 
+// ---- DASHBOARD ----
 function renderDashboard() {
   const machines = getMachines();
   const operations = getOperations();
+  const repairs = getRepairs();
   const now = new Date();
   const urgent = machines.filter(m => getStatus(m) === 'danger').length;
   const warn = machines.filter(m => getStatus(m) === 'warn').length;
@@ -522,24 +943,65 @@ function renderDashboard() {
     const d = new Date(o.date);
     return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
   }).length;
+  const pendingRepairs = repairs.filter(r => r.status === 'pending').length;
+
   document.getElementById('stat-total').textContent = machines.length;
   document.getElementById('stat-urgent').textContent = urgent;
   document.getElementById('stat-warn').textContent = warn;
   document.getElementById('stat-ops').textContent = thisMonth;
+  document.getElementById('stat-repairs').textContent = pendingRepairs;
 
+  // NOTIF BANNERS (alertes vidange + réparations)
+  const bannerDiv = document.getElementById('notif-banners');
+  let banners = '';
+  const urgentMachines = machines.filter(m => getStatus(m) === 'danger');
+  const warnMachines = machines.filter(m => getStatus(m) === 'warn');
+  if (urgentMachines.length > 0) {
+    banners += `<div class="notif-banner" onclick="openEmailModal('urgent')">
+      <div class="notif-icon">🚨</div>
+      <div class="notif-text">
+        <div class="notif-title">${urgentMachines.length} machine(s) dépassée(s) -- vidange URGENTE</div>
+        <div class="notif-sub">${urgentMachines.map(m=>m.name).join(', ')} · Cliquez pour envoyer une notification email</div>
+      </div>
+      <span class="badge badge-red">Notifier</span>
+    </div>`;
+  }
+  if (warnMachines.length > 0) {
+    banners += `<div class="notif-banner warn-notif" onclick="openEmailModal('warn')">
+      <div class="notif-icon">⚠️</div>
+      <div class="notif-text">
+        <div class="notif-title">${warnMachines.length} machine(s) à surveiller -- vidange bientôt</div>
+        <div class="notif-sub">${warnMachines.map(m=>m.name+' ('+Math.max(0,m.nextService-m.hours)+'h restantes)').join(', ')}</div>
+      </div>
+      <span class="badge badge-orange">Notifier</span>
+    </div>`;
+  }
+  if (pendingRepairs > 0) {
+    banners += `<div class="notif-banner" style="border-left-color:var(--purple)" onclick="showTab('reparations')">
+      <div class="notif-icon">🔧</div>
+      <div class="notif-text">
+        <div class="notif-title" style="color:var(--purple)">${pendingRepairs} réparation(s) en attente</div>
+        <div class="notif-sub">Cliquez pour voir le tableau mécanicien</div>
+      </div>
+      <span class="badge badge-purple">Voir</span>
+    </div>`;
+  }
+  bannerDiv.innerHTML = banners;
+
+  // ALERTS
   const alertsDiv = document.getElementById('alerts-list');
   const alerts = machines.filter(m => getStatus(m) !== 'ok').sort((a,b) => {
     const o = {danger:0,warn:1}; return o[getStatus(a)] - o[getStatus(b)];
   });
   if (alerts.length === 0) {
-    alertsDiv.innerHTML = '<div style="color:var(--green);font-size:14px;padding:10px 0">✓ Aucune alerte — tout est à jour !</div>';
+    alertsDiv.innerHTML = '<div style="color:var(--green);font-size:14px;padding:10px 0">✓ Aucune alerte -- tout est à jour !</div>';
   } else {
     alertsDiv.innerHTML = alerts.map(m => {
       const s = getStatus(m); const r = m.nextService - m.hours;
       return `<div class="alert-card ${s==='warn'?'warning':''}">
         <div class="alert-info">
-          <div class="alert-machine">${m.name}</div>
-          <div class="alert-desc">${r<=0?'⚠ DÉPASSÉ de '+Math.abs(r)+'h':r+'h restantes'} — Prochain à ${m.nextService}h</div>
+          <div class="alert-machine">${m.name} ${m.location?'<span style="font-size:12px;color:var(--blue)">📍 '+m.location+'</span>':''}</div>
+          <div class="alert-desc">${r<=0?'⚠ DÉPASSÉ de '+Math.abs(r)+'h':r+'h restantes'} -- Prochain à ${m.nextService}h · Actuel : ${m.hours}h</div>
         </div>
         <span class="badge ${s==='danger'?'badge-red':'badge-orange'}">${s==='danger'?'URGENT':'Bientôt'}</span>
         <button class="btn-sm btn-primary" onclick="openModalForMachine('${m.id}')">Saisir</button>
@@ -547,17 +1009,18 @@ function renderDashboard() {
     }).join('');
   }
 
+  // RECENT OPS
   const recentDiv = document.getElementById('recent-ops-list');
-  const recent = [...operations].sort((a,b) => new Date(b.date)-new Date(a.date)).slice(0,5);
+  const recent = [...operations].slice(0,5);
   if (recent.length === 0) {
     recentDiv.innerHTML = '<div class="empty"><div class="empty-icon">🔧</div><div>Aucune opération enregistrée</div></div>';
   } else {
     recentDiv.innerHTML = recent.map(o => {
       const m = machines.find(x => x.id === o.machineId);
-      return `<div class="alert-card" style="border-left-color:var(--accent)">
+      return `<div class="alert-card info" style="border-left-color:var(--accent)">
         <div class="alert-info">
-          <div class="alert-machine">${m?m.name:'Machine supprimée'} — ${o.type}</div>
-          <div class="alert-desc">${o.hours}h · ${o.operator} · ${formatDate(o.date)}</div>
+          <div class="alert-machine">${m?m.name:'Machine supprimée'} -- ${o.typeFree||o.type}</div>
+          <div class="alert-desc">${o.hours}h · ${o.operator} · ${formatDate(o.date)}${o.location?' · 📍 '+o.location:''}</div>
         </div>
         <span class="badge badge-green">✓</span>
       </div>`;
@@ -565,12 +1028,11 @@ function renderDashboard() {
   }
 }
 
+// ---- MACHINES ----
 function renderMachines(search) {
   if (search !== undefined) searchVal = search.toLowerCase();
   const machines = getMachines();
-  let list = machines.filter(m =>
-    m.name.toLowerCase().includes(searchVal) || (m.serial||'').toLowerCase().includes(searchVal)
-  );
+  let list = machines.filter(m => m.name.toLowerCase().includes(searchVal) || (m.serial||'').toLowerCase().includes(searchVal) || (m.location||'').toLowerCase().includes(searchVal));
   if (currentFilter !== 'all') list = list.filter(m => getStatus(m) === currentFilter);
   const grid = document.getElementById('machines-grid');
   if (list.length === 0) {
@@ -580,11 +1042,20 @@ function renderMachines(search) {
     const s = getStatus(m); const pct = getProgress(m); const r = m.nextService - m.hours;
     const ops = getOperations().filter(o => o.machineId === m.id);
     const lastOp = ops.sort((a,b) => new Date(b.date)-new Date(a.date))[0];
+    const pendingReps = getRepairs().filter(rep => rep.machineId === m.id && rep.status === 'pending').length;
+    const isAdmin = window._currentRole === 'admin';
     return `<div class="machine-card" onclick="showDetail('${m.id}')">
       <div class="machine-header">
-        <div><div class="machine-name">${m.name}</div><div class="machine-id">${m.serial||''}</div></div>
-        <div><div class="machine-hours">${(m.hours||0).toLocaleString()}<span>heures</span></div>
-        <span class="badge ${s==='danger'?'badge-red':s==='warn'?'badge-orange':'badge-green'}" style="float:right;margin-top:4px">${s==='danger'?'URGENT':s==='warn'?'Bientôt':'OK'}</span></div>
+        <div>
+          <div class="machine-name">${m.name}</div>
+          <div class="machine-id">${m.serial||''}</div>
+          ${m.location?`<div class="machine-location">📍 ${m.location}</div>`:''}
+          ${pendingReps>0?`<div style="font-size:11px;color:var(--purple);margin-top:3px">🔧 ${pendingReps} réparation(s) en attente</div>`:''}
+        </div>
+        <div>
+          <div class="machine-hours">${(m.hours||0).toLocaleString()}<span>heures</span></div>
+          <span class="badge ${s==='danger'?'badge-red':s==='warn'?'badge-orange':'badge-green'}" style="float:right;margin-top:4px">${s==='danger'?'URGENT':s==='warn'?'Bientôt':'OK'}</span>
+        </div>
       </div>
       <div class="progress-label"><span>Vers prochain entretien</span><span>${r>0?r+'h restantes':'DÉPASSÉ'}</span></div>
       <div class="progress-bar"><div class="progress-fill ${s}" style="width:${pct}%"></div></div>
@@ -593,31 +1064,37 @@ function renderMachines(search) {
         <div class="machine-actions">
           <button class="btn-sm btn-outline" onclick="event.stopPropagation();showDetail('${m.id}')">Détails</button>
           <button class="btn-sm btn-primary" onclick="event.stopPropagation();openModalForMachine('${m.id}')">+ Op.</button>
+          ${isAdmin?`<button class="btn-sm btn-danger" onclick="event.stopPropagation();deleteMachine('${m.id}')">🗑</button>`:''}
         </div>
       </div>
     </div>`;
   }).join('');
 }
 
-function showDetail(machineId) {
+// ---- DETAIL ----
+window.showDetail = function(machineId) {
   const m = getMachines().find(x => x.id === machineId);
   if (!m) return;
   const ops = getOperations().filter(o => o.machineId === machineId).sort((a,b) => new Date(b.date)-new Date(a.date));
+  const reps = getRepairs().filter(r => r.machineId === machineId);
   const s = getStatus(m); const r = m.nextService - m.hours;
+  const isAdmin = window._currentRole === 'admin';
+
   document.getElementById('detail-content').innerHTML = `
     <div class="detail-header">
       <div>
         <button class="back-btn" onclick="showTab('machines')">← Retour</button>
         <div class="detail-title" style="margin-top:10px">${m.name}</div>
         <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:4px">
-          <span style="font-size:13px;color:var(--muted)">N° <strong style="color:var(--text)">${m.serial||'—'}</strong></span>
+          <span style="font-size:13px;color:var(--muted)">N° <strong style="color:var(--text)">${m.serial||'--'}</strong></span>
           <span style="font-size:13px;color:var(--muted)">Intervalle <strong style="color:var(--text)">${m.interval}h</strong></span>
+          ${m.location?`<span style="font-size:13px;color:var(--blue)">📍 ${m.location}</span>`:''}
           <span class="badge ${s==='danger'?'badge-red':s==='warn'?'badge-orange':'badge-green'}">${s==='danger'?'URGENT':s==='warn'?'À surveiller':'OK'}</span>
         </div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn" onclick="openModalForMachine('${m.id}')">+ Entretien</button>
-        <button class="btn-sm btn-danger" onclick="deleteMachine('${m.id}')">🗑</button>
+        <button class="btn" onclick="openModalForMachine('${m.id}')">+ Intervention</button>
+        ${isAdmin?`<button class="btn-sm btn-danger" onclick="deleteMachine('${m.id}')">🗑</button>`:''}
       </div>
     </div>
     <div class="detail-stats">
@@ -628,59 +1105,120 @@ function showDetail(machineId) {
     </div>
     <div class="progress-label"><span>Progression entretien</span><span>${Math.round(getProgress(m))}%</span></div>
     <div class="progress-bar" style="height:10px;margin-bottom:24px"><div class="progress-fill ${s}" style="width:${getProgress(m)}%"></div></div>
-    <div class="section-title">Historique</div>
+
+    ${reps.filter(r=>r.status==='pending').length>0?`
+    <div class="section-title" style="color:var(--purple)">🔧 Réparations en attente</div>
+    <div style="margin:12px 0 24px">
+    ${reps.filter(r=>r.status==='pending').map(rep=>`
+      <div class="repair-card">
+        <div class="repair-header">
+          <div><div class="repair-meta">Signalé par ${rep.reportedBy} le ${formatDate(rep.date)} ${rep.location?'· 📍 '+rep.location:''}</div></div>
+          <span class="badge badge-purple">En attente</span>
+        </div>
+        <div class="repair-desc">${rep.description}</div>
+        <div class="repair-actions">
+          <button class="btn-sm btn-purple" onclick="openCloseRepair('${rep.id}')">✓ Clôturer</button>
+        </div>
+      </div>`).join('')}
+    </div>`:''}
+
+    <div class="section-title">Historique complet</div>
     <div class="table-wrap" style="margin-top:12px">
       <table>
-        <thead><tr><th>Date</th><th>Type</th><th>Heures</th><th>Opérateur</th><th>Prochain</th><th>Notes</th><th></th></tr></thead>
+        <thead><tr><th>Date</th><th>Type</th><th>Heures</th><th>Par</th><th>Chantier</th><th>Prochain</th><th>Détails</th>${isAdmin?'<th></th>':''}</tr></thead>
         <tbody>
-          ${ops.length===0?'<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px">Aucune opération</td></tr>':
-            ops.map(o=>`<tr>
-              <td>${formatDate(o.date)}</td>
-              <td><span class="op-type"><span class="op-dot" style="background:${typeColors[o.type]||'#888'}"></span>${o.type}</span></td>
-              <td>${o.hours}h</td><td>${o.operator}</td>
-              <td>${o.nextService?o.nextService+'h':'—'}</td>
-              <td style="color:var(--muted);font-size:12px">${o.notes||'—'}</td>
-              <td><button class="btn-sm btn-danger" onclick="deleteOperation('${o.id}')">🗑</button></td>
-            </tr>`).join('')}
+        ${ops.length===0?`<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:30px">Aucune opération</td></tr>`:
+          ops.map(o=>`<tr>
+            <td>${formatDate(o.date)}</td>
+            <td><span class="op-type"><span class="op-dot" style="background:${typeColors[o.type]||'#888'}"></span>${o.typeFree||o.type}</span></td>
+            <td>${o.hours}h</td><td>${o.operator}</td>
+            <td style="color:var(--blue)">${o.location||'--'}</td>
+            <td>${o.nextService?o.nextService+'h':'--'}</td>
+            <td style="color:var(--muted);font-size:12px">${o.notes||'--'}</td>
+            ${isAdmin?`<td><button class="btn-sm btn-danger" onclick="deleteOperation('${o.id}')">🗑</button></td>`:''}
+          </tr>`).join('')}
         </tbody>
       </table>
     </div>`;
+
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-detail').classList.add('active');
 }
 
+// ---- HISTORIQUE ----
 function renderHistorique(search) {
   const machines = getMachines();
   const operations = getOperations();
   const hm = document.getElementById('hist-filter-machine').value;
   const s = (search || '').toLowerCase();
-  let list = [...operations].sort((a,b) => new Date(b.date)-new Date(a.date));
+  let list = [...operations];
   if (hm !== 'all') list = list.filter(o => o.machineId === hm);
   if (currentHistType !== 'all') list = list.filter(o => o.type === currentHistType);
   if (s) list = list.filter(o => {
     const m = machines.find(x=>x.id===o.machineId);
-    return (m&&m.name.toLowerCase().includes(s))||o.type.toLowerCase().includes(s)||(o.operator||'').toLowerCase().includes(s);
+    return (m&&m.name.toLowerCase().includes(s))||(o.type||'').toLowerCase().includes(s)||(o.operator||'').toLowerCase().includes(s)||(o.location||'').toLowerCase().includes(s);
   });
   const tbody = document.getElementById('hist-tbody');
+  const isAdmin = window._currentRole === 'admin';
   tbody.innerHTML = list.map(o => {
     const m = machines.find(x=>x.id===o.machineId);
     return `<tr>
       <td>${formatDate(o.date)}</td>
-      <td>${m?m.name:'—'}</td>
-      <td><span class="op-type"><span class="op-dot" style="background:${typeColors[o.type]||'#888'}"></span>${o.type}</span></td>
+      <td>${m?m.name:'--'}</td>
+      <td style="color:var(--blue);font-size:12px">${o.location||'--'}</td>
+      <td><span class="op-type"><span class="op-dot" style="background:${typeColors[o.type]||'#888'}"></span>${o.typeFree||o.type}</span></td>
       <td>${o.hours}h</td><td>${o.operator}</td>
-      <td style="color:var(--muted);font-size:12px">${o.notes||'—'}</td>
-      <td><button class="btn-sm btn-danger" onclick="deleteOperation('${o.id}')">🗑</button></td>
+      <td style="color:var(--muted);font-size:12px">${o.notes||'--'}</td>
+      ${isAdmin?`<td><button class="btn-sm btn-danger" onclick="deleteOperation('${o.id}')">🗑</button></td>`:''}
     </tr>`;
   }).join('');
   document.getElementById('hist-empty').style.display = list.length===0?'block':'none';
 }
 
+// ---- RÉPARATIONS ----
+function renderRepairs() {
+  const repairs = getRepairs();
+  const machines = getMachines();
+  const filter = document.getElementById('repair-filter').value;
+  let list = repairs;
+  if (filter === 'pending') list = repairs.filter(r=>r.status==='pending');
+  else if (filter === 'done') list = repairs.filter(r=>r.status==='done');
+  list = list.sort((a,b) => new Date(b.createdAt||b.date) - new Date(a.createdAt||a.date));
+
+  const div = document.getElementById('repairs-list');
+  const isMeca = window._currentRole === 'mecanicien' || window._currentRole === 'admin';
+  if (list.length === 0) {
+    div.innerHTML = `<div class="empty"><div class="empty-icon">🔧</div><div>${filter==='pending'?'Aucune réparation en attente -- tout est bon !':'Aucune réparation'}</div></div>`;
+    return;
+  }
+  div.innerHTML = list.map(r => {
+    const m = machines.find(x=>x.id===r.machineId);
+    const isDone = r.status === 'done';
+    return `<div class="repair-card ${isDone?'repair-done':''}">
+      <div class="repair-header">
+        <div>
+          <div class="repair-machine-name">${r.machineName||m?.name||'--'} ${m?.location||r.location?'<span style="color:var(--blue);font-size:12px">📍 '+(m?.location||r.location)+'</span>':''}</div>
+          <div class="repair-meta">Signalé par <strong>${r.reportedBy}</strong> le ${formatDate(r.date)} · ${r.hours}h ${isDone?'· Clôturé par <strong>'+r.closedBy+'</strong>':''}</div>
+        </div>
+        <span class="badge ${isDone?'badge-green':'badge-purple'}">${isDone?'✓ Fait':'En attente'}</span>
+      </div>
+      <div class="repair-desc">${r.description}</div>
+      ${isDone&&r.closedType?`<div style="font-size:12px;color:var(--green);margin-bottom:8px">✓ Intervention : ${r.closedType}</div>`:''}
+      <div class="repair-actions">
+        ${!isDone&&isMeca?`<button class="btn-sm btn-purple" onclick="openCloseRepair('${r.id}')">✓ Clôturer</button>`:''}
+        ${window._currentRole==='admin'?`<button class="btn-sm btn-danger" onclick="deleteRepair('${r.id}')">🗑</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ---- SELECTS ----
 function updateMachineSelects() {
   const machines = getMachines();
-  const opts = '<option value="">Sélectionner...</option>' + machines.map(m=>`<option value="${m.id}">${m.name}</option>`).join('');
+  const opts = '<option value="">Sélectionner...</option>' + machines.map(m=>`<option value="${m.id}">${m.name}${m.location?' ('+m.location+')':''}</option>`).join('');
   document.getElementById('op-machine').innerHTML = opts;
+  document.getElementById('ch-machine').innerHTML = opts;
   const hf = document.getElementById('hist-filter-machine');
   hf.innerHTML = '<option value="all">Toutes les machines</option>' + machines.map(m=>`<option value="${m.id}">${m.name}</option>`).join('');
 }
@@ -689,22 +1227,90 @@ function openModal(name) {
   if (name==='new-op') {
     updateMachineSelects();
     document.getElementById('op-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('op-hours-locked-msg').textContent = '';
+    document.getElementById('op-hours').disabled = false;
+    document.getElementById('op-hours').value = '';
+    document.getElementById('repair-complete-section').style.display = 'none';
+    document.getElementById('op-repair-context').textContent = 'Enregistrez l\'intervention réalisée';
+    window._currentRepairId = null;
   }
   document.getElementById('modal-'+name).classList.add('open');
 }
 function closeModal(name) { document.getElementById('modal-'+name).classList.remove('open'); }
-function openModalForMachine(machineId) {
+
+window.openModalForMachine = function(machineId) {
   openModal('new-op');
   document.getElementById('op-machine').value = machineId;
   const m = getMachines().find(x=>x.id===machineId);
-  if (m) { document.getElementById('op-hours').value = m.hours||''; document.getElementById('op-next').value = m.nextService||''; }
-}
+  if (m) {
+    document.getElementById('op-hours').value = m.hours||'';
+    document.getElementById('op-next').value = m.nextService||'';
+    document.getElementById('op-location').value = m.location||'';
+    // VERROU : on pré-remplit les heures mais on bloque la valeur min
+    document.getElementById('op-hours-locked-msg').textContent = `Heures actuelles : ${m.hours}h -- Vous pouvez uniquement entrer une valeur supérieure ou égale.`;
+  }
+};
+
+// Verrouillage heures côté UI : bloquer la saisie inférieure
+document.getElementById('op-machine').addEventListener('change', function() {
+  const m = getMachines().find(x=>x.id===this.value);
+  if (m) {
+    document.getElementById('op-hours').min = m.hours;
+    document.getElementById('op-hours').value = m.hours;
+    document.getElementById('op-hours-locked-msg').textContent = `Heures actuelles : ${m.hours}h -- Vous pouvez uniquement entrer une valeur supérieure ou égale.`;
+    document.getElementById('op-location').value = m.location||'';
+    document.getElementById('op-next').value = m.nextService||'';
+  }
+});
+
+// EMAIL MODAL
+window.openEmailModal = function(type) {
+  const machines = getMachines();
+  const urgent = machines.filter(m => getStatus(m) === 'danger');
+  const warn = machines.filter(m => getStatus(m) === 'warn');
+  const now = new Date().toLocaleDateString('fr-FR', {day:'2-digit',month:'long',year:'numeric'});
+
+  let body = `RABASSE TP -- MécaTrack\nAlerte entretien du ${now}\n\n`;
+  if (type === 'urgent' && urgent.length > 0) {
+    body += `🚨 MACHINES AVEC ENTRETIEN DÉPASSÉ :\n\n`;
+    urgent.forEach(m => {
+      const r = m.hours - m.nextService;
+      body += `• ${m.name} (${m.serial||m.id})\n`;
+      body += `  Heures actuelles : ${m.hours}h | Entretien prévu à : ${m.nextService}h\n`;
+      body += `  Dépassement : ${r}h${m.location?' | Chantier : '+m.location:''}\n\n`;
+    });
+    body += `⚠ Ces machines nécessitent une vidange/entretien IMMÉDIAT.\n`;
+  } else {
+    body += `⚠ MACHINES À SURVEILLER -- ENTRETIEN BIENTÔT :\n\n`;
+    warn.forEach(m => {
+      const r = m.nextService - m.hours;
+      body += `• ${m.name} (${m.serial||m.id})\n`;
+      body += `  Heures actuelles : ${m.hours}h | Entretien prévu à : ${m.nextService}h\n`;
+      body += `  Heures restantes : ${r}h${m.location?' | Chantier : '+m.location:''}\n\n`;
+    });
+  }
+  body += `\nMécaTrack -- RABASSE TP`;
+
+  document.getElementById('email-preview').textContent = body;
+  window._emailBody = body;
+  openModal('email');
+};
+
+window.copyEmail = function() {
+  if (window._emailBody) {
+    navigator.clipboard.writeText(window._emailBody).then(() => {
+      showToast('✓ Message copié dans le presse-papier !');
+      closeModal('email');
+    });
+  }
+};
+
 document.querySelectorAll('.modal-overlay').forEach(el => el.addEventListener('click', e => { if(e.target===el) el.classList.remove('open'); }));
 
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+  setTimeout(() => t.classList.remove('show'), 3500);
 }
 </script>
 </body>

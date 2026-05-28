@@ -230,7 +230,9 @@ select.filter-select { background: var(--surface); border: 1px solid var(--borde
         <option value="Graisse">🟤 Graisses</option>
         <option value="Nettoyant">🟣 Nettoyants</option>
         <option value="Chiffon">⚪ Chiffons</option>
-        <option value="Pièce">🔴 Pièces</option>
+        <option value="Pièce Mecalac">🔴 Pièces Mecalac</option>
+        <option value="Pièce CAT">🔴 Pièces CAT</option>
+        <option value="Pièce Liebherr">🔴 Pièces Liebherr</option>
         <option value="Autre">Autre</option>
       </select>
     </div>
@@ -318,7 +320,9 @@ select.filter-select { background: var(--surface); border: 1px solid var(--borde
           <option value="Graisse">🟤 Graisse</option>
           <option value="Nettoyant">🟣 Nettoyant</option>
           <option value="Chiffon">⚪ Chiffon</option>
-          <option value="Pièce">🔴 Pièce mécanique</option>
+          <option value="Pièce Mecalac">🔴 Pièces Mecalac</option>
+          <option value="Pièce CAT">🔴 Pièces CAT</option>
+          <option value="Pièce Liebherr">🔴 Pièces Liebherr</option>
           <option value="Autre">Autre</option>
         </select>
       </div>
@@ -622,6 +626,15 @@ function applyRole(role, user) {
   // Onglets selon rôle
   document.getElementById('tab-btn-mouvements').classList.toggle('hidden', false);
   document.getElementById('tab-btn-admin-stock').classList.toggle('hidden', role === 'chauffeur');
+  // Masquer les catégories pièces mécaniques pour les chauffeurs
+  const catFilter = document.getElementById('cat-filter');
+  if (catFilter) {
+    Array.from(catFilter.options).forEach(opt => {
+      if (opt.value.startsWith('Pièce')) {
+        opt.style.display = role === 'chauffeur' ? 'none' : '';
+      }
+    });
+  }
   renderAll();
   showTab('stock');
 }
@@ -648,8 +661,8 @@ window.logout = logout;
 let currentCatFilter = 'all', searchVal = '', currentMouvType = 'all';
 window.currentCatFilter = 'all';
 
-const catColors = { 'Huile':'#f39c12','Filtre':'#3498db','Graisse':'#8B4513','Nettoyant':'#9b59b6','Chiffon':'#95a5a6','Pièce':'#e74c3c','Autre':'#8890a4' };
-const catEmojis = { 'Huile':'🟡','Filtre':'🔵','Graisse':'🟤','Nettoyant':'🟣','Chiffon':'⚪','Pièce':'🔴','Autre':'📦' };
+const catColors = { 'Huile':'#f39c12','Filtre':'#3498db','Graisse':'#8B4513','Nettoyant':'#9b59b6','Chiffon':'#95a5a6','Pièce Mecalac':'#e74c3c','Pièce CAT':'#c0392b','Pièce Liebherr':'#e67e22','Autre':'#8890a4' };
+const catEmojis = { 'Huile':'🟡','Filtre':'🔵','Graisse':'🟤','Nettoyant':'🟣','Chiffon':'⚪','Pièce Mecalac':'🔴','Pièce CAT':'🔴','Pièce Liebherr':'🔴','Autre':'📦' };
 
 function renderStockPage(search) {
   if (search !== undefined) searchVal = search.toLowerCase();
@@ -657,6 +670,10 @@ function renderStockPage(search) {
   let list = articles.filter(a => {
     const matchSearch = !searchVal || a.name.toLowerCase().includes(searchVal) || (a.ref||'').toLowerCase().includes(searchVal);
     const matchCat = cat === 'all' || a.cat === cat;
+    // Chauffeurs ne voient pas les pièces mécaniques
+    const isChauffeur = window._currentRole === 'chauffeur';
+    const isPiece = a.cat && a.cat.startsWith('Pièce');
+    if (isChauffeur && isPiece) return false;
     return matchSearch && matchCat;
   }).sort((a,b) => {
     const aAlert = a.qty <= a.min ? 0 : 1;

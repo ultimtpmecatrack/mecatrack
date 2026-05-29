@@ -185,7 +185,11 @@ td { padding: 12px 14px; vertical-align: middle; }
 .op-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
 /* RÉPARATIONS / TABLEAU MÉCANICIEN */
-.repair-card { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--purple); border-radius: 10px; padding: 16px; margin-bottom: 12px; }
+.repair-card { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--purple); border-radius: 10px; padding: 16px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s; }
+.repair-card:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+.repair-card.priorite-urgent { border-left-color: var(--red); background: rgba(231,76,60,0.05); }
+.repair-card.priorite-surveiller { border-left-color: var(--orange); background: rgba(243,156,18,0.05); }
+.repair-card.priorite-normal { border-left-color: var(--purple); }
 .repair-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
 .repair-machine-name { font-weight: 600; font-size: 15px; }
 .repair-meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
@@ -1351,6 +1355,16 @@ window.deleteRepair = async function(id) {
   try { await deleteDoc(doc(db, 'repairs', id)); showToast('Fiche supprimée'); } catch(e) { alert('Erreur: ' + e.message); }
 };
 
+// ---- PRIORITÉ RÉPARATION ----
+window.setPriorite = async function(repairId, priorite) {
+  try {
+    const { doc, updateDoc } = window._fs;
+    const db = window._db;
+    await updateDoc(doc(db, 'repairs', repairId), { priorite });
+    showToast(priorite === 'urgent' ? '🔴 Marqué URGENT !' : priorite === 'surveiller' ? '🟠 Marqué À surveiller' : '✓ Priorité mise à jour');
+  } catch(e) { alert('Erreur: ' + e.message); }
+};
+
 // ---- USERS (dans le bloc Firebase pour accès à addDoc/db) ----
 window.saveUser = async function() {
   const name = document.getElementById('u-name').value.trim();
@@ -2000,14 +2014,46 @@ function renderDashboard() {
     </div>`;
   }
   if (pendingRepairs > 0) {
-    banners += `<div class="notif-banner" style="border-left-color:var(--purple)" onclick="showTab('reparations')">
-      <div class="notif-icon">🔧</div>
-      <div class="notif-text">
-        <div class="notif-title" style="color:var(--purple)">${pendingRepairs} réparation(s) en attente</div>
-        <div class="notif-sub">Cliquez pour voir le tableau mécanicien</div>
-      </div>
-      <span class="badge badge-purple">Voir</span>
-    </div>`;
+    const urgentes = repairs.filter(r => r.status === 'pending' && r.priorite === 'urgent');
+    const surveiller = repairs.filter(r => r.status === 'pending' && r.priorite === 'surveiller');
+    const normales = repairs.filter(r => r.status === 'pending' && !r.priorite);
+
+    if (urgentes.length > 0) {
+      urgentes.forEach(r => {
+        const m = machines.find(x => x.id === r.machineId);
+        banners += `<div class="notif-banner" style="border-left-color:var(--red);background:rgba(231,76,60,0.12)" onclick="showDetail('${r.machineId}')">
+          <div class="notif-icon">🔴</div>
+          <div class="notif-text">
+            <div class="notif-title" style="color:var(--red)">URGENT — ${m?m.name:'Machine'}${m?.location?' 📍 '+m.location:''}</div>
+            <div class="notif-sub">${r.description.substring(0,80)} · Signalé par ${r.reportedBy}</div>
+          </div>
+          <span class="badge badge-red">→ Voir</span>
+        </div>`;
+      });
+    }
+    if (surveiller.length > 0) {
+      surveiller.forEach(r => {
+        const m = machines.find(x => x.id === r.machineId);
+        banners += `<div class="notif-banner warn-notif" onclick="showDetail('${r.machineId}')">
+          <div class="notif-icon">🟠</div>
+          <div class="notif-text">
+            <div class="notif-title" style="color:var(--orange)">À SURVEILLER — ${m?m.name:'Machine'}${m?.location?' 📍 '+m.location:''}</div>
+            <div class="notif-sub">${r.description.substring(0,80)} · Signalé par ${r.reportedBy}</div>
+          </div>
+          <span class="badge badge-orange">→ Voir</span>
+        </div>`;
+      });
+    }
+    if (normales.length > 0) {
+      banners += `<div class="notif-banner" style="border-left-color:var(--purple)" onclick="showTab('reparations')">
+        <div class="notif-icon">🔧</div>
+        <div class="notif-text">
+          <div class="notif-title" style="color:var(--purple)">${normales.length} réparation(s) en attente</div>
+          <div class="notif-sub">${normales.map(r=>{ const m=machines.find(x=>x.id===r.machineId); return m?m.name:'—'; }).join(', ')}</div>
+        </div>
+        <span class="badge badge-purple">Voir</span>
+      </div>`;
+    }
   }
   bannerDiv.innerHTML = banners;
 
@@ -2407,17 +2453,23 @@ function renderRepairs() {
   div.innerHTML = list.map(r => {
     const m = machines.find(x=>x.id===r.machineId);
     const isDone = r.status === 'done';
-    return `<div class="repair-card ${isDone?'repair-done':''}">
+    const prioriteClass = r.priorite ? 'priorite-'+r.priorite : 'priorite-normal';
+    const prioriteLabel = r.priorite === 'urgent' ? '🔴 URGENT' : r.priorite === 'surveiller' ? '🟠 À surveiller' : '🟢 Normal';
+    return `<div class="repair-card ${isDone?'repair-done':prioriteClass}" onclick="${!isDone?`showDetail('${r.machineId}')`:''}" >
       <div class="repair-header">
         <div>
           <div class="repair-machine-name">${r.machineName||m?.name||'—'} ${m?.location||r.location?'<span style="color:var(--blue);font-size:12px">📍 '+(m?.location||r.location)+'</span>':''}</div>
           <div class="repair-meta">Signalé par <strong>${r.reportedBy}</strong> le ${formatDate(r.date)} · ${r.hours}h ${isDone?'· Clôturé par <strong>'+r.closedBy+'</strong>':''}</div>
         </div>
-        <span class="badge ${isDone?'badge-green':'badge-purple'}">${isDone?'✓ Fait':'En attente'}</span>
+        <span class="badge ${isDone?'badge-green':r.priorite==='urgent'?'badge-red':r.priorite==='surveiller'?'badge-orange':'badge-purple'}">${isDone?'✓ Fait':prioriteLabel}</span>
       </div>
       <div class="repair-desc">${r.description}</div>
       ${isDone&&r.closedType?`<div style="font-size:12px;color:var(--green);margin-bottom:8px">✓ Intervention : ${r.closedType}</div>`:''}
-      <div class="repair-actions">
+      <div class="repair-actions" onclick="event.stopPropagation()">
+        ${!isDone?`
+          <button class="btn-sm" style="background:rgba(231,76,60,0.15);color:var(--red);border:1px solid rgba(231,76,60,0.3)" onclick="setPriorite('${r.id}','urgent')">🔴 Urgent</button>
+          <button class="btn-sm" style="background:rgba(243,156,18,0.15);color:var(--orange);border:1px solid rgba(243,156,18,0.3)" onclick="setPriorite('${r.id}','surveiller')">🟠 Surveiller</button>
+        `:''}
         ${!isDone&&isMeca?`<button class="btn-sm btn-purple" onclick="openCloseRepair('${r.id}')">✓ Clôturer</button>`:''}
         ${window._currentRole==='admin'?`<button class="btn-sm btn-danger" onclick="deleteRepair('${r.id}')">🗑</button>`:''}
       </div>

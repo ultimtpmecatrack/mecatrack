@@ -715,7 +715,12 @@ window.saveChauffeurEntry=async function(){
     ['ch-hours','ch-operator','ch-repairs','ch-notes','ch-location','fioul-litres'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
     equipIds.forEach(id=>{const el=document.getElementById('eq-'+id);if(el)el.checked=false;});
     document.getElementById('fioul-non').checked=true; document.getElementById('fioul-litres').style.display='none';
-    showToast(repairsText?'✓ Saisie + réparation signalée !':'✓ Saisie enregistrée !'+(fioulFait?' ⛽'+(fioulLitres?' '+fioulLitres+'L'):''));
+   let msg = repairsText ? '✓ Saisie + réparation signalée !' : '✓ Saisie enregistrée !';
+if(fioulFait){
+  msg += ' ⛽';
+  if(fioulLitres) msg += ' ' + fioulLitres + 'L';
+}
+showToast(msg);
   }catch(e){alert('Erreur: '+e.message);}
 };
 

@@ -426,7 +426,31 @@ td{padding:12px 14px;vertical-align:middle}
       <div class="form-group"><label class="form-label">🟠 Type 2 — 500h</label><textarea class="form-textarea" id="m-vid2" placeholder="ex: Filtre primaire, Filtre secondaire, Filtre fuel, Huile moteur" style="min-height:52px"></textarea></div>
       <div class="form-group"><label class="form-label">🟢 Type 3 — 750h</label><textarea class="form-textarea" id="m-vid3" placeholder="ex: Filtre à huile moteur, Huile moteur 15W40" style="min-height:52px"></textarea></div>
       <div class="form-group" style="margin-bottom:0"><label class="form-label">🔴 Type 4 — 1000h</label><textarea class="form-textarea" id="m-vid4" placeholder="ex: Type 2 complet + Vidange barbotins + Filtre hydraulique" style="min-height:52px"></textarea></div>
-    </div>
+    </div><div style="margin-top:15px;border-top:1px solid rgba(255,255,255,.1);padding-top:15px">
+<div style="font-size:12px;color:var(--muted);margin-bottom:10px">
+⏱️ Intervalles personnalisés des vidanges
+</div>
+
+<div class="form-group">
+<label class="form-label">Type 1 (heures)</label>
+<input class="form-input" type="number" id="m-int1" value="250">
+</div>
+
+<div class="form-group">
+<label class="form-label">Type 2 (heures)</label>
+<input class="form-input" type="number" id="m-int2" value="500">
+</div>
+
+<div class="form-group">
+<label class="form-label">Type 3 (heures)</label>
+<input class="form-input" type="number" id="m-int3" value="750">
+</div>
+
+<div class="form-group">
+<label class="form-label">Type 4 (heures)</label>
+<input class="form-input" type="number" id="m-int4" value="1000">
+</div>
+</div>
   </div>
   <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('new-machine')">Annuler</button><button class="btn" onclick="saveMachine()">✓ Ajouter</button></div>
 </div></div>
@@ -681,15 +705,33 @@ window.saveOperation=async function(){
 window.saveMachine=async function(){
   const name=document.getElementById('m-name').value.trim(), serial=document.getElementById('m-serial').value.trim(), hours=parseInt(document.getElementById('m-hours').value)||0, interval=parseInt(document.getElementById('m-interval').value)||500, next=parseInt(document.getElementById('m-next').value)||hours+interval, location=document.getElementById('m-location').value.trim(), lastVid=parseInt(document.getElementById('m-last-vidange').value)||hours, vidIdx=parseInt(document.getElementById('m-vidange-type').value)||0, machineType=document.getElementById('m-type').value||'A';
   if(!name){alert('Veuillez entrer un nom de machine');return;}
-  let customVidangeItems=null;
-  if(machineType!=='A'){
-    const parse=v=>v.trim()?v.split(',').map(s=>s.trim()).filter(Boolean):[];
-    customVidangeItems={1:parse(document.getElementById('m-vid1').value),2:parse(document.getElementById('m-vid2').value),3:parse(document.getElementById('m-vid3').value),4:parse(document.getElementById('m-vid4').value)};
+let customVidangeItems=null;
+let customIntervals=null;
+
+if(machineType!=='A'){
+
+  customIntervals={
+    1:parseInt(document.getElementById('m-int1').value)||250,
+    2:parseInt(document.getElementById('m-int2').value)||500,
+    3:parseInt(document.getElementById('m-int3').value)||750,
+    4:parseInt(document.getElementById('m-int4').value)||1000
+  };
+
+  const parse=v=>v.trim()?v.split(',').map(s=>s.trim()).filter(Boolean):[];
+
+  customVidangeItems={
+  1:parse(document.getElementById('m-vid1').value),
+  2:parse(document.getElementById('m-vid2').value),
+  3:parse(document.getElementById('m-vid3').value),
+  4:parse(document.getElementById('m-vid4').value)
+};
   }
   try{
     const data={name,serial:serial||'—',hours,nextService:next,interval,location:location||'',lastVidangeHours:lastVid,vidangeTypeIndex:vidIdx,machineType,createdAt:new Date().toISOString()};
-    if(customVidangeItems)data.customVidangeItems=customVidangeItems;
-    await addDoc(collection(db,'machines'),data);
+ if(customVidangeItems)data.customVidangeItems=customVidangeItems;
+if(customIntervals)data.customIntervals=customIntervals;
+
+await addDoc(collection(db,'machines'),data);
     closeModal('new-machine');
     ['m-name','m-serial','m-hours','m-next','m-location','m-last-vidange','m-vid1','m-vid2','m-vid3','m-vid4'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
     document.getElementById('m-interval').value='500'; document.getElementById('m-vidange-type').value='0'; document.getElementById('m-type').value='A'; document.getElementById('m-custom-vidange').style.display='none';
